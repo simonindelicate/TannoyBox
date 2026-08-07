@@ -1,0 +1,9 @@
+build/
+build-*/
+JUCE/
+.vs/
+*.user
+*.suo
+Tools/panel-preview.html
+packaging/output/
+Thumbs.db

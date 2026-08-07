@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="116" height="180" viewBox="0 0 116 180">
+<!-- ==========================================================================
+     TannoyBox — PLACEHOLDER READOUT WINDOW (116 x 180)
+     Drawn at 262,120 in the 640x480 panel.
+
+     The plugin writes two lines of live text over the middle of this frame:
+       line 1 (era / touched control name)  ~ y  26..82
+       line 2 (metres / value)              ~ y  82..116
+     Keep that area clear in any replacement.
+     ========================================================================== -->
+
+<defs>
+  <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#0c0e0c"/>
+    <stop offset="1" stop-color="#191d18"/>
+  </linearGradient>
+</defs>
+
+<rect x="0" y="0" width="116" height="180" rx="3" fill="#22271f"/>
+<rect x="6" y="6" width="104" height="168" rx="2" fill="url(#glass)"/>
+<rect x="6" y="6" width="104" height="168" rx="2" fill="none" stroke="#7e8a7b" stroke-opacity="0.28"/>
+
+<!-- destination-board slots, top and bottom -->
+<g fill="#b24a28" fill-opacity="0.7">
+  <rect x="18" y="14" width="80" height="2"/>
+  <rect x="18" y="164" width="80" height="2"/>
+</g>
+
+<g font-family="Helvetica Neue, Helvetica, Arial, sans-serif" text-anchor="middle">
+  <text x="58" y="132" font-size="7" fill="#7e8a7b" letter-spacing="1.6">ANNOUNCING</text>
+  <text x="58" y="152" font-size="7" fill="#7e8a7b" letter-spacing="1.6" fill-opacity="0.7">TYPE 4/3</text>
+</g>
+
+<g id="placeholder-guides">
+  <rect x="0.5" y="0.5" width="115" height="179" fill="none" stroke="#e5195e"
+        stroke-width="1" stroke-dasharray="5 4" opacity="0.7"/>
+  <rect x="10" y="26" width="96" height="90" fill="none" stroke="#e5195e"
+        stroke-width="1" stroke-dasharray="2 3" opacity="0.5"/>
+</g>
+</svg>

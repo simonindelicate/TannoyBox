@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+<!-- TannoyBox placeholder: knob_small_face.svg (64x64) -->
+<defs>
+<linearGradient id="skirt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3e443c"/><stop offset="1" stop-color="#171b16"/></linearGradient>
+<linearGradient id="cap" x1="0" y1="0" x2="0.3" y2="1"><stop offset="0" stop-color="#262b24"/><stop offset="1" stop-color="#101210"/></linearGradient>
+</defs>
+<circle cx="32.0" cy="32.0" r="30.6" fill="url(#skirt)"/>
+<circle cx="32.0" cy="32.0" r="30.6" fill="none" stroke="#d8cfb8" stroke-opacity="0.22" stroke-width="0.51"/>
+<g stroke="#171a17" stroke-opacity="0.6" stroke-width="1.02" stroke-linecap="round">
+<line x1="32.0" y1="6.3" x2="32.0" y2="2.0"/>
+<line x1="44.8" y1="9.7" x2="47.0" y2="6.0"/>
+<line x1="54.3" y1="19.2" x2="58.0" y2="17.0"/>
+<line x1="57.7" y1="32.0" x2="62.0" y2="32.0"/>
+<line x1="54.3" y1="44.8" x2="58.0" y2="47.0"/>
+<line x1="44.8" y1="54.3" x2="47.0" y2="58.0"/>
+<line x1="32.0" y1="57.7" x2="32.0" y2="62.0"/>
+<line x1="19.2" y1="54.3" x2="17.0" y2="58.0"/>
+<line x1="9.7" y1="44.8" x2="6.0" y2="47.0"/>
+<line x1="6.3" y1="32.0" x2="2.0" y2="32.0"/>
+<line x1="9.7" y1="19.2" x2="6.0" y2="17.0"/>
+<line x1="19.2" y1="9.7" x2="17.0" y2="6.0"/>
+</g>
+<circle cx="32.0" cy="32.0" r="21.4" fill="url(#cap)"/>
+<circle cx="32.0" cy="32.0" r="21.4" fill="none" stroke="#7e8a7b" stroke-opacity="0.20" stroke-width="1"/>
+<circle cx="32.0" cy="32.0" r="3.1" fill="#b24a28" fill-opacity="0.85"/>
+</svg>
