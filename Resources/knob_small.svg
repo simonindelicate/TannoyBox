@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
-<!-- TannoyBox placeholder: knob_small_face.svg (64x64) -->
+<!-- TannoyBox placeholder: knob_small.svg (64x64) -->
 <defs>
 <linearGradient id="skirt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3e443c"/><stop offset="1" stop-color="#171b16"/></linearGradient>
 <linearGradient id="cap" x1="0" y1="0" x2="0.3" y2="1"><stop offset="0" stop-color="#262b24"/><stop offset="1" stop-color="#101210"/></linearGradient>

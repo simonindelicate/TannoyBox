@@ -96,40 +96,110 @@ the order of `table[]` in `interpolateEra()`.
 
 ## Replacing the artwork
 
-Six SVGs in `Resources/`, all obviously placeholder — dashed pink construction
-marks live in a `<g id="placeholder-guides">` group in each file, so deleting
-that one group cleans a file up.
+Assets are referenced by **stem** — `background`, not `background.svg` — and
+resolved at runtime in this order, first hit wins:
 
-| File | Design size | Notes |
+1. `<skin folder>/<stem>.png`
+2. `<skin folder>/<stem>.svg`
+3. built-in `<stem>.png` from `Resources/`
+4. built-in `<stem>.svg`
+
+PNG beats SVG at every level, so migrating to bitmap artwork means dropping
+`background.png` into `Resources/` and rebuilding. The placeholder SVG is then
+simply never reached. Nothing needs deleting and no code changes.
+
+The skin folder is `~/Documents/TannoyBox/Skin/` (or
+`%USERPROFILE%\Documents\TannoyBox\Skin\`). It does not exist until you make
+it. Files there override the built-in copies at load time, so closing and
+reopening the plugin window is enough to see a change — no rebuild.
+
+| Stem | Design size | Notes |
 |---|---|---|
-| `background.svg` | 640 × 480 | The whole panel, **including all static lettering**: knob names, scale legends, captions. |
-| `knob_face.svg` | 196 × 196 | Drawn centred; never rotates. |
-| `knob_pointer.svg` | 196 × 196 | Rotates about the centre of its own frame — must point straight up at rest. |
-| `knob_small_face.svg` | 64 × 64 | Used automatically for controls under 100 px. |
-| `logo.svg` | 240 × 52 | Brand mark, drawn at 26,20. |
-| `nameplate.svg` | 116 × 180 | Readout window. Keep y 26–116 clear; the plugin writes live text there. |
+| `background` | 640 × 480 | The whole panel, **including all static lettering**. Author PNGs at 2× (1280 × 960). |
+| `knob_large` | 196 × 196 | Filmstrip or single frame — see below. |
+| `knob_small` | 64 × 64 | Used automatically for controls under 100 px. |
+| `knob_pointer` | 196 × 196 | Only used when the knob art is a single frame. Must point straight up at rest. |
+| `logo` | 240 × 52 | Drawn at 26,20. |
+| `nameplate` | 116 × 180 | Readout window. Keep y 26–116 clear; the plugin writes live text there. |
 
-Static text is on the panel rather than in the code so that replacing
-`background.svg` re-types the whole instrument in one move.
+### Knob filmstrips
 
-**Two ways to swap them:**
+A knob image that is taller than it is wide is treated as a vertically stacked
+sprite sheet, frame 0 fully anticlockwise and the last frame fully clockwise.
+The frame count is inferred as height ÷ width, so a 200 × 25600 PNG is 128
+frames of 200 × 200 and there is nothing to configure. In filmstrip mode the
+code stops drawing its own value arc and index marks, assuming the artwork
+carries them.
 
-1. Overwrite the files and rebuild.
-2. Drop replacements into `~/Documents/TannoyBox/Skin/` (or
-   `%USERPROFILE%\Documents\TannoyBox\Skin\`) using the same filenames. Those
-   win at load time, so you can iterate without a compiler. Delete a file to
-   fall back.
+A square image is treated as a static face instead, with `knob_pointer` rotated
+over the top. That is cheaper to author but the lighting does not move with the
+control, which looks noticeably flat in bitmap.
+
+`Tools/make_filmstrip.py` will bake a strip by rotating a single frame. It is
+the quick version, not the best version — a fixed light source, with only the
+knob body rotating, is what makes commercial knobs look solid, and that has to
+come from your renderer.
 
 **Preview without building anything:** open `Tools/panel-preview.html`. It
-renders the panel with working dials, and you can drag a replacement `.svg`
-onto the page to see it in place immediately. Re-run
-`python3 Tools/make_preview.py` to bake changes back in.
+renders the panel with working dials, and you can drag a replacement file onto
+the page to see it in place immediately.
 
 If you move a control, the coordinates live in two places that must agree:
-`Layout::` at the top of `Source/PluginEditor.cpp`, and the matching constants
-in `Tools/make_background.py`.
+`Layout::` at the top of `Source/PluginEditor.cpp`, and the constants in
+`Tools/make_background.py`.
 
 ---
+
+## Distributing it
+
+### Version discipline
+
+Two things must never change once anything is public: `PLUGIN_CODE` and
+`PLUGIN_MANUFACTURER_CODE` in CMakeLists.txt, and the parameter ID strings in
+`ParamID`. Hosts identify the plugin by the former and write the latter into
+saved sessions. Changing either silently breaks every project anyone has made
+with it. Bump `project(TannoyBox VERSION ...)` for each release instead.
+
+### Windows
+
+The build already links the MSVC runtime statically, so there is no Visual C++
+Redistributable for users to chase.
+
+The simplest distribution is a zip containing the `TannoyBox.vst3` folder and a
+one-paragraph note saying to drop it in `C:\Program Files\Common Files\VST3\`
+and rescan. That works, and plenty of small plugin developers do nothing more.
+
+`packaging/installer.iss` is a script for [Inno Setup](https://jrsoftware.org/isinfo.php),
+which is free. Build in Release, open the script, press Compile, and you get a
+single `.exe` that installs the VST3 and the standalone and registers an
+uninstaller. Considerably kinder to a non-technical user.
+
+Unsigned, either route will make SmartScreen say "Windows protected your PC"
+and hide the Run button behind **More info**. Signing removes that, but a code
+signing certificate now has to live on a hardware token or cloud HSM, which
+puts it in the region of £200–400 a year through a reseller. Certum's
+open-source developer certificate is substantially cheaper if the project
+qualifies. Worth checking current prices — this market moves.
+
+### macOS
+
+Universal binaries are already configured. The problem is Gatekeeper, which is
+stricter than SmartScreen: an unsigned, un-notarised plugin downloaded from the
+web will be refused outright on Apple Silicon rather than merely warned about.
+Users can clear it with `xattr -dr com.apple.quarantine`, but telling people to
+run terminal commands is not distribution.
+
+Doing it properly means the Apple Developer Program (\$99/year), a Developer ID
+Application certificate, `codesign` on each bundle, a `.pkg` built with
+`pkgbuild`/`productbuild`, then `notarytool submit --wait` and `stapler staple`.
+It is a day of faff the first time and a two-line script forever after.
+
+### Honest advice
+
+Ship unsigned to begin with, as a zip, with clear instructions and a note that
+the warning is expected. If people actually use it, pay for signing then. The
+Apple fee is the one worth paying first, because on macOS unsigned is closer to
+broken than to inconvenient.
 
 ## Worth considering next
 

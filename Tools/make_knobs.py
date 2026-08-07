@@ -3,7 +3,7 @@
 
     python3 Tools/make_knobs.py
 
-knob_face.svg / knob_small_face.svg are drawn centred and never rotate.
+knob_large.svg / knob_small.svg are drawn centred and never rotate.
 knob_pointer.svg is rotated about the centre of its own frame, so whatever you
 put in it must point STRAIGHT UP at rest.
 """
@@ -83,6 +83,6 @@ def pointer(size):
     return b
 
 
-write("knob_face.svg", face(196, 18, True), 196)
-write("knob_small_face.svg", face(64, 12, False), 64)
+write("knob_large.svg", face(196, 18, True), 196)
+write("knob_small.svg", face(64, 12, False), 64)
 write("knob_pointer.svg", pointer(196), 196)

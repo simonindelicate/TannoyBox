@@ -2,7 +2,8 @@
 
 /*  Layout is authored in a 640 x 480 design space and scaled to the window, so
     the panel artwork and the controls always agree. Every rectangle below is in
-    design units — if you move something in background.svg, move it here too.   */
+    design units — if you move something in the background artwork, move it here
+    too, and in Tools/make_background.py if you are still generating the SVG.   */
 
 namespace Layout
 {
@@ -21,9 +22,9 @@ TannoyBoxEditor::TannoyBoxEditor (TannoyBoxProcessor& p)
 {
     setLookAndFeel (&lnf);
 
-    background = Assets::load ("background.svg", BinaryData::background_svg, BinaryData::background_svgSize);
-    logo       = Assets::load ("logo.svg",       BinaryData::logo_svg,       BinaryData::logo_svgSize);
-    nameplate  = Assets::load ("nameplate.svg",  BinaryData::nameplate_svg,  BinaryData::nameplate_svgSize);
+    background = Assets::loadDrawable ("background");
+    logo       = Assets::loadDrawable ("logo");
+    nameplate  = Assets::loadDrawable ("nameplate");
 
     configure (vintage, ParamID::vintage, "VINTAGE");
     configure (size,    ParamID::size,    "SIZE");
@@ -39,6 +40,9 @@ TannoyBoxEditor::TannoyBoxEditor (TannoyBoxProcessor& p)
     if (auto* c = getConstrainer())
     {
         c->setFixedAspectRatio (640.0 / 480.0);
+
+        // Upper limit is deliberately the 2x authoring size of the bitmap
+        // artwork. Past that, PNGs are being upscaled and it shows.
         c->setSizeLimits (480, 360, 1280, 960);
     }
 
@@ -80,6 +84,7 @@ juce::Rectangle<int> TannoyBoxEditor::d (int x, int y, int w, int h) const noexc
 void TannoyBoxEditor::paint (juce::Graphics& g)
 {
     g.fillAll (Palette::panel);
+    g.setImageResamplingQuality (juce::Graphics::highResamplingQuality);
 
     if (background != nullptr)
         background->drawWithin (g, getLocalBounds().toFloat(), juce::RectanglePlacement::stretchToFit, 1.0f);

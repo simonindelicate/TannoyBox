@@ -1,14 +1,26 @@
 cmake_minimum_required(VERSION 3.22)
 
+# --- must be set before project() ---------------------------------------------
+if(APPLE)
+    set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "Universal binary")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum macOS")
+endif()
+
 project(TannoyBox VERSION 1.0.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-# ----------------------------------------------------------------------------
-# JUCE. Either drop a JUCE checkout next to this file, or let CMake fetch it.
-# ----------------------------------------------------------------------------
+# Static MSVC runtime. Without this the plugin needs the Visual C++
+# Redistributable installed on the end user's machine, which is exactly the
+# support email you do not want to answer.
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
+# ------------------------------------------------------------------------------
+# JUCE. Either drop a checkout next to this file, or let CMake fetch it.
+# The tag is pinned deliberately: JUCE deprecates API between minor versions.
+# ------------------------------------------------------------------------------
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/JUCE/CMakeLists.txt")
     add_subdirectory(JUCE)
 else()
@@ -23,8 +35,10 @@ endif()
 juce_add_plugin(TannoyBox
     COMPANY_NAME            "Indelicate Instruments"
     BUNDLE_ID               "xyz.indelicates.tannoybox"
-    PLUGIN_MANUFACTURER_CODE Indl          # 4 chars, one uppercase
-    PLUGIN_CODE             Tnby           # 4 chars, one uppercase
+    # NEVER change these two after a public release. Hosts identify the plugin
+    # by them, and changing either orphans every saved session that used it.
+    PLUGIN_MANUFACTURER_CODE Indl
+    PLUGIN_CODE             Tnby
     FORMATS                 VST3 AU Standalone
     PRODUCT_NAME            "TannoyBox"
     IS_SYNTH                FALSE
@@ -34,17 +48,19 @@ juce_add_plugin(TannoyBox
     EDITOR_WANTS_KEYBOARD_FOCUS FALSE
     COPY_PLUGIN_AFTER_BUILD TRUE)
 
-# ----------------------------------------------------------------------------
-# UI assets. Replace the files in Resources/ and rebuild — nothing else to edit.
-# (Or drop replacements in the runtime skin folder; see Source/UI/Assets.h.)
-# ----------------------------------------------------------------------------
-juce_add_binary_data(TannoyBoxAssets SOURCES
-    Resources/background.svg
-    Resources/knob_face.svg
-    Resources/knob_pointer.svg
-    Resources/knob_small_face.svg
-    Resources/logo.svg
-    Resources/nameplate.svg)
+# ------------------------------------------------------------------------------
+# UI assets. Globbed, so dropping a new .png or .svg into Resources/ is all that
+# is required — no edit here. CONFIGURE_DEPENDS makes CMake notice new files on
+# the next build rather than needing a manual re-configure.
+#
+# Assets are resolved by stem at runtime with PNG preferred over SVG, so a
+# background.png quietly supersedes background.svg with no code change.
+# ------------------------------------------------------------------------------
+file(GLOB TANNOYBOX_ASSETS CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/Resources/*.png"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Resources/*.svg")
+
+juce_add_binary_data(TannoyBoxAssets SOURCES ${TANNOYBOX_ASSETS})
 
 target_sources(TannoyBox PRIVATE
     Source/PluginProcessor.cpp

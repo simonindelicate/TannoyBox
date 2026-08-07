@@ -15,8 +15,8 @@ import os
 here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 res = os.path.join(here, "Resources")
 
-names = ["background.svg", "knob_face.svg", "knob_pointer.svg",
-         "knob_small_face.svg", "logo.svg", "nameplate.svg"]
+names = ["background.svg", "knob_large.svg", "knob_pointer.svg",
+         "knob_small.svg", "logo.svg", "nameplate.svg"]
 
 svgs = {}
 for n in names:
@@ -25,12 +25,12 @@ for n in names:
 
 # design-space geometry, mirroring Layout:: in PluginEditor.cpp
 controls = [
-    ("vintage", "knob_face.svg", 46, 116, 196, 196, 0.72),
-    ("size", "knob_face.svg", 398, 116, 196, 196, 0.40),
-    ("drive", "knob_small_face.svg", 64, 372, 64, 64, 0.5),
-    ("howl", "knob_small_face.svg", 213, 372, 64, 64, 0.0),
-    ("mix", "knob_small_face.svg", 363, 372, 64, 64, 1.0),
-    ("output", "knob_small_face.svg", 512, 372, 64, 64, 0.66),
+    ("vintage", "knob_large.svg", 46, 116, 196, 196, 0.72),
+    ("size", "knob_large.svg", 398, 116, 196, 196, 0.40),
+    ("drive", "knob_small.svg", 64, 372, 64, 64, 0.5),
+    ("howl", "knob_small.svg", 213, 372, 64, 64, 0.0),
+    ("mix", "knob_small.svg", 363, 372, 64, 64, 1.0),
+    ("output", "knob_small.svg", 512, 372, 64, 64, 0.66),
 ]
 
 parts = []

@@ -2,9 +2,14 @@
 
 TannoyLookAndFeel::TannoyLookAndFeel()
 {
-    face      = Assets::load ("knob_face.svg",       BinaryData::knob_face_svg,       BinaryData::knob_face_svgSize);
-    smallFace = Assets::load ("knob_small_face.svg", BinaryData::knob_small_face_svg, BinaryData::knob_small_face_svgSize);
-    pointer   = Assets::load ("knob_pointer.svg",    BinaryData::knob_pointer_svg,    BinaryData::knob_pointer_svgSize);
+    // Filmstrips first. If these turn out to be single square frames, or SVGs,
+    // isStrip() stays false and we fall through to the face + pointer path.
+    largeStrip.load ("knob_large");
+    smallStrip.load ("knob_small");
+
+    largeFace = Assets::loadDrawable ("knob_large");
+    smallFace = Assets::loadDrawable ("knob_small");
+    pointer   = Assets::loadDrawable ("knob_pointer");
 
     setColour (juce::Label::textColourId, Palette::cream);
     setColour (juce::TooltipWindow::backgroundColourId, Palette::ink);
@@ -32,18 +37,31 @@ void TannoyLookAndFeel::drawRotarySlider (juce::Graphics& g, int x, int y, int w
                                           float sliderPos, float startAngle, float endAngle,
                                           juce::Slider& slider)
 {
-    const auto bounds = juce::Rectangle<int> (x, y, width, height).toFloat();
-    const auto square = bounds.withSizeKeepingCentre (juce::jmin (bounds.getWidth(), bounds.getHeight()),
-                                                      juce::jmin (bounds.getWidth(), bounds.getHeight()));
-    const auto centre = square.getCentre();
-    const float r     = square.getWidth() * 0.5f;
-    const float angle = startAngle + sliderPos * (endAngle - startAngle);
+    const bool  isSmall = width < 100;
+    const auto& strip   = isSmall ? smallStrip : largeStrip;
 
-    // ---- index marks --------------------------------------------------------
+    const auto bounds = juce::Rectangle<int> (x, y, width, height);
+    const int  side   = juce::jmin (bounds.getWidth(), bounds.getHeight());
+    const auto square = bounds.withSizeKeepingCentre (side, side);
+
+    // ---- filmstrip: the artwork is the whole control -----------------------
+    if (strip.isStrip())
+    {
+        strip.draw (g, square, sliderPos);
+        return;
+    }
+
+    // ---- otherwise: engraved marks, value arc, face, rotated pointer -------
+    const auto  sq     = square.toFloat();
+    const auto  centre = sq.getCentre();
+    const float r      = sq.getWidth() * 0.5f;
+    const float angle  = startAngle + sliderPos * (endAngle - startAngle);
+
     const int detents = (int) slider.getProperties().getWithDefault ("detents", 0);
     if (detents > 1)
     {
         g.setColour (Palette::cream.withAlpha (0.55f));
+
         for (int i = 0; i < detents; ++i)
         {
             const float t = (float) i / (float) (detents - 1);
@@ -56,7 +74,6 @@ void TannoyLookAndFeel::drawRotarySlider (juce::Graphics& g, int x, int y, int w
         }
     }
 
-    // ---- value arc ----------------------------------------------------------
     {
         juce::Path track, value;
         track.addCentredArc (centre.x, centre.y, r * 1.08f, r * 1.08f, 0.0f, startAngle, endAngle, true);
@@ -70,27 +87,24 @@ void TannoyLookAndFeel::drawRotarySlider (juce::Graphics& g, int x, int y, int w
                                                    juce::PathStrokeType::rounded));
     }
 
-    // ---- face ---------------------------------------------------------------
-    auto* body = (width < 100 && smallFace != nullptr) ? smallFace.get() : face.get();
-
-    if (body != nullptr)
+    if (auto* body = isSmall ? smallFace.get() : largeFace.get())
     {
-        body->drawWithin (g, square.reduced (r * 0.04f), juce::RectanglePlacement::centred, 1.0f);
+        g.setImageResamplingQuality (juce::Graphics::highResamplingQuality);
+        body->drawWithin (g, sq.reduced (r * 0.04f), juce::RectanglePlacement::centred, 1.0f);
     }
     else
     {
         g.setColour (Palette::ink);
-        g.fillEllipse (square.reduced (r * 0.06f));
+        g.fillEllipse (sq.reduced (r * 0.06f));
     }
 
-    // ---- pointer ------------------------------------------------------------
     {
         juce::Graphics::ScopedSaveState save (g);
         g.addTransform (juce::AffineTransform::rotation (angle, centre.x, centre.y));
 
         if (pointer != nullptr)
         {
-            pointer->drawWithin (g, square, juce::RectanglePlacement::centred, 1.0f);
+            pointer->drawWithin (g, sq, juce::RectanglePlacement::centred, 1.0f);
         }
         else
         {

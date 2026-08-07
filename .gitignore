@@ -1,9 +1,23 @@
+# CMake build tree — also where JUCE gets fetched to
 build/
 build-*/
+
+# a local JUCE checkout, if you ever add one
 JUCE/
+
+# Visual Studio / Xcode local state
 .vs/
 *.user
 *.suo
+DerivedData/
+*.xcuserdatad/
+
+# generated preview — rebuild with Tools/make_preview.py
 Tools/panel-preview.html
+
+# installer output
 packaging/output/
+
+# OS litter
+.DS_Store
 Thumbs.db

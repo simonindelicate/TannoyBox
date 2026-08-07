@@ -1,0 +1,6 @@
+# Keep binary artwork out of diffs. If the filmstrips get large (they will,
+# 128 frames at 200px is around 4 MB each), consider Git LFS:
+#     git lfs install && git lfs track "Resources/*.png"
+*.png binary
+*.wav binary
+*.vst3 binary

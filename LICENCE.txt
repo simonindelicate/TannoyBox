@@ -1,0 +1,9 @@
+TannoyBox
+Copyright (c) 2026 Simon Indelicate
+
+Replace this file with whatever licence you want. It exists because the Inno
+Setup script references it, and because JUCE itself is dual-licensed: the
+GPLv3 option is free, the commercial option is not. If you distribute this
+plugin as a binary without a JUCE commercial licence, your own source must be
+made available under the GPLv3. That is fine for an open project on GitHub and
+a problem for a closed paid one, so decide which this is before you release.
