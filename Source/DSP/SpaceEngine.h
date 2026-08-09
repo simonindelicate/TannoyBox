@@ -25,6 +25,18 @@
 
     The taps are what make it read as a public address system rather than a
     reverb plugin: a tannoy is always several speakers at different distances.
+
+    ROOM decides how much of the output is room and how much is the horn's own
+    direct arrival, with unity on both at the centre:
+
+        0.0   direct arrival only — no taps, no tail, no room at all
+        0.5   both at full, which is the balance the physical model gives
+        1.0   taps and tail only, nothing direct — a send/return delay
+
+    Below centre it is a level control on the room; above centre it fades the
+    direct arrival out from under it. The predelay stays on the direct arrival
+    at every position, because time of flight belongs to SIZE, not to this —
+    a horn 115 m away really is 100 ms late whether or not you want its room.
     ============================================================================
 */
 
@@ -44,8 +56,17 @@ public:
         for (int i = 0; i < 8; ++i)
             line[i].setSize ((int) (sampleRate * 0.45) + 64);
 
+        blendCoef = onePoleCoef (15.0f);
+
         lastSize = -1.0f;
         setSize (0.35f);
+
+        // Defaults stand in until the host tells us where ROOM actually is; the
+        // first call after prepare snaps rather than glides, so opening a
+        // session set to ROOM ONLY does not leak 50 ms of direct horn.
+        setRoomAmount (0.5f);
+        blendPrimed = false;
+
         reset();
     }
 
@@ -112,6 +133,23 @@ public:
         modInc[1] = juce::MathConstants<float>::twoPi * 0.47f / (float) sr;
     }
 
+    /** 0 = direct only, 0.5 = the model's own balance, 1 = room only. Smoothed
+        per sample inside process(), so this is safe to call once per block. */
+    void setRoomAmount (float room01) noexcept
+    {
+        const float r = juce::jlimit (0.0f, 1.0f, room01);
+
+        roomTarget   = juce::jmin (1.0f, r * 2.0f);
+        directTarget = juce::jmin (1.0f, (1.0f - r) * 2.0f);
+
+        if (! blendPrimed)
+        {
+            roomG   = roomTarget;
+            directG = directTarget;
+            blendPrimed = true;
+        }
+    }
+
     void process (const float* in, float* outL, float* outR, int n)
     {
         for (int i = 0; i < n; ++i)
@@ -164,9 +202,14 @@ public:
             for (int j = 0; j < 8; ++j)
                 line[j].push (d * 0.35f + f[j]);
 
+            // --- room / direct balance ------------------------------------------
+            roomG   += blendCoef * (roomTarget   - roomG);
+            directG += blendCoef * (directTarget - directG);
+
             // --- air absorption on the whole wet signal ------------------------
-            const float mixL = tl + wetL * tailGain * 0.35f + pre * 0.55f;
-            const float mixR = tr + wetR * tailGain * 0.35f + pre * 0.55f;
+            const float direct = pre * 0.55f * directG;
+            const float mixL   = (tl + wetL * tailGain * 0.35f) * roomG + direct;
+            const float mixR   = (tr + wetR * tailGain * 0.35f) * roomG + direct;
 
             airL += airCoef * (mixL - airL);
             airR += airCoef * (mixR - airR);
@@ -253,4 +296,7 @@ private:
     float dampCoef = 0.5f, airCoef = 0.5f, tailGain = 0.6f;
     float modDepth = 0.0f, modPhase[2] {}, modInc[2] {};
     float airL = 0.0f, airR = 0.0f;
+    float roomTarget = 1.0f, directTarget = 1.0f;
+    float roomG = 1.0f, directG = 1.0f, blendCoef = 0.002f;
+    bool  blendPrimed = false;
 };

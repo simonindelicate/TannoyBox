@@ -3,10 +3,13 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_dsp/juce_dsp.h>
 
+#include "DSP/Chime.h"
 #include "DSP/EraProfiles.h"
 #include "DSP/HornBody.h"
 #include "DSP/SpaceEngine.h"
 
+/*  These strings are written into every saved session. Adding to this list is
+    safe; renaming or removing anything in it is not. */
 namespace ParamID
 {
     static constexpr const char* vintage = "vintage";
@@ -15,6 +18,9 @@ namespace ParamID
     static constexpr const char* howl    = "howl";
     static constexpr const char* mix     = "mix";
     static constexpr const char* output  = "output";
+    static constexpr const char* room    = "room";
+    static constexpr const char* ptt     = "ptt";
+    static constexpr const char* chime   = "chime";
 }
 
 class TannoyBoxProcessor : public juce::AudioProcessor
@@ -52,9 +58,14 @@ public:
 private:
     HornBody    horn;
     SpaceEngine space;
+    Chime       chime;
 
     juce::AudioBuffer<float> dryBuffer, monoBuffer, wetBuffer;
-    juce::SmoothedValue<float> mixSm, outSm, driveSm, howlSm, vintageSm, sizeSm;
+    juce::SmoothedValue<float> mixSm, outSm, driveSm, howlSm, vintageSm, sizeSm, roomSm;
+
+    // The chime parameter is a momentary trigger: the phrase fires on the
+    // rising edge, so holding it down does not machine-gun.
+    bool lastChime = false;
 
     double sr = 44100.0;
 

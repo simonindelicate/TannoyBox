@@ -47,6 +47,25 @@ juce::AudioProcessorValueTreeState::ParameterLayout TannoyBoxProcessor::createLa
         NormalisableRange<float> { -24.0f, 12.0f, 0.1f }, 0.0f,
         AudioParameterFloatAttributes().withLabel ("dB")));
 
+    // Appended rather than inserted: hosts that automate by index rather than
+    // by ID keep working on sessions saved before these existed.
+    layout.add (std::make_unique<AudioParameterFloat> (
+        ParameterID { ParamID::room, 1 }, "Room",
+        NormalisableRange<float> { 0.0f, 1.0f }, 0.5f,
+        AudioParameterFloatAttributes().withStringFromValueFunction (
+            [] (float v, int)
+            {
+                if (v < 0.005f) return String ("HORN ONLY");
+                if (v > 0.995f) return String ("ROOM ONLY");
+                return String (roundToInt (v * 100.0f)) + " %";
+            })));
+
+    layout.add (std::make_unique<AudioParameterBool> (
+        ParameterID { ParamID::ptt, 1 }, "PTT Gate", false));
+
+    layout.add (std::make_unique<AudioParameterBool> (
+        ParameterID { ParamID::chime, 1 }, "Chime", false));
+
     return layout;
 }
 
@@ -70,13 +89,33 @@ void TannoyBoxProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 
     horn.prepare (sampleRate, samplesPerBlock);
     space.prepare (sampleRate, samplesPerBlock);
+    chime.prepare (sampleRate);
 
     dryBuffer.setSize (2, samplesPerBlock);
     monoBuffer.setSize (1, samplesPerBlock);
     wetBuffer.setSize (2, samplesPerBlock);
 
-    for (auto* s : { &mixSm, &outSm, &driveSm, &howlSm, &vintageSm, &sizeSm })
+    for (auto* s : { &mixSm, &outSm, &driveSm, &howlSm, &vintageSm, &sizeSm, &roomSm })
         s->reset (sampleRate, 0.05);
+
+    // Seeded from where the dials actually are, not from zero. Without this the
+    // first 50 ms of every transport start ramps OUTPUT up from silence and
+    // sweeps VINTAGE across from MODERN.
+    const auto now = [this] (const char* id) { return apvts.getRawParameterValue (id)->load(); };
+
+    vintageSm.setCurrentAndTargetValue (now (ParamID::vintage));
+    sizeSm.setCurrentAndTargetValue    (now (ParamID::size));
+    driveSm.setCurrentAndTargetValue   (now (ParamID::drive));
+    howlSm.setCurrentAndTargetValue    (now (ParamID::howl));
+    mixSm.setCurrentAndTargetValue     (now (ParamID::mix));
+    roomSm.setCurrentAndTargetValue    (now (ParamID::room));
+    outSm.setCurrentAndTargetValue     (juce::Decibels::decibelsToGain (now (ParamID::output)));
+
+    space.setRoomAmount (roomSm.getCurrentValue());
+
+    // Seeded, not cleared: a session saved with the button held would otherwise
+    // look like a rising edge and strike the chime on load.
+    lastChime = now (ParamID::chime) > 0.5f;
 
     setLatencySamples (horn.getLatencySamples());
 }
@@ -102,6 +141,9 @@ void TannoyBoxProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     const float howl    = apvts.getRawParameterValue (ParamID::howl)->load();
     const float mix     = apvts.getRawParameterValue (ParamID::mix)->load();
     const float outDb   = apvts.getRawParameterValue (ParamID::output)->load();
+    const float room    = apvts.getRawParameterValue (ParamID::room)->load();
+    const bool  pttOn   = apvts.getRawParameterValue (ParamID::ptt)->load() > 0.5f;
+    const bool  chimeOn = apvts.getRawParameterValue (ParamID::chime)->load() > 0.5f;
 
     vintageSm.setTargetValue (vintage);
     sizeSm.setTargetValue (size);
@@ -109,11 +151,18 @@ void TannoyBoxProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     howlSm.setTargetValue (howl);
     mixSm.setTargetValue (mix);
     outSm.setTargetValue (juce::Decibels::decibelsToGain (outDb));
+    roomSm.setTargetValue (room);
 
     // Coefficients update once per block from the smoothed value: cheap, and
     // fast enough that a dial sweep sounds continuous rather than stepped.
-    horn.setParameters (vintageSm.skip (n), driveSm.skip (n), howlSm.skip (n));
+    horn.setParameters (vintageSm.skip (n), driveSm.skip (n), howlSm.skip (n), pttOn);
     space.setSize (sizeSm.skip (n));
+    space.setRoomAmount (roomSm.skip (n));
+
+    if (chimeOn && ! lastChime)
+        chime.trigger();
+
+    lastChime = chimeOn;
 
     // ---- keep a dry copy ----------------------------------------------------
     dryBuffer.setSize (juce::jmax (1, numOut), n, false, false, true);
@@ -125,6 +174,12 @@ void TannoyBoxProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     monoBuffer.clear();
     for (int ch = 0; ch < numIn; ++ch)
         monoBuffer.addFrom (0, 0, buffer, ch, 0, n, numIn > 1 ? 0.5f : 1.0f);
+
+    // ---- chime, into the horn's input --------------------------------------
+    // Deliberately upstream of everything: the horn's band-limiting is what
+    // makes it a station chime rather than an orchestral one, and being real
+    // programme material it keys the PTT gate open on its own.
+    chime.process (monoBuffer.getWritePointer (0), n);
 
     // ---- horn ---------------------------------------------------------------
     juce::dsp::AudioBlock<float> monoBlock (monoBuffer);

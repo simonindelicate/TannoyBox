@@ -2,6 +2,7 @@
 
 #include <juce_dsp/juce_dsp.h>
 #include "EraProfiles.h"
+#include "PttGate.h"
 
 /*  ============================================================================
     HornBody
@@ -10,13 +11,18 @@
     hanging off an overworked line amplifier.
 
         pre band-limit  ->  formant bells  ->  wobble  ->  [4x] saturate
-        ->  line-amp limiter  ->  howl resonance  ->  hiss + hum
+        ->  line-amp limiter  ->  PTT gate  ->  howl resonance
+        ->  hiss + hum  ->  key click / release thump
         ->  post band-limit  ->  DC block
 
     Band-limiting happens on both sides of the nonlinearity: once to feed the
     driver only what it can reproduce, once to stop the distortion products
     escaping outside the horn's passband. That two-sided arrangement is what
     stops it sounding like a fuzz pedal.
+
+    The PTT gate sits where the keying relay would: after the amplifier, so it
+    gates the howl loop and the noise floor along with the programme, and its
+    own click and thump are still shaped by the post filter on the way out.
     ============================================================================
 */
 
@@ -45,6 +51,8 @@ public:
         attCoef = std::exp (-1.0f / (float) (0.004 * sampleRate));
         relCoef = std::exp (-1.0f / (float) (0.130 * sampleRate));
 
+        ptt.prepare (sampleRate);
+
         lastVintage = -1.0f;
         reset();
     }
@@ -57,6 +65,7 @@ public:
         if (oversampler != nullptr) oversampler->reset();
         wobbleDelay.reset();
         howlDelay.reset();
+        ptt.reset();
         env = 0.0f; howlState = 0.0f; dcX1 = dcY1 = 0.0f;
         wobPhase = humPhase = 0.0f;
     }
@@ -67,10 +76,12 @@ public:
     }
 
     /** Called once per block. Coefficients are only rebuilt when the dial moves. */
-    void setParameters (float vintage01, float extraDriveDb, float howlAmount)
+    void setParameters (float vintage01, float extraDriveDb, float howlAmount, bool pttEnabled)
     {
         drive     = juce::Decibels::decibelsToGain (extraDriveDb);
         howlAmt   = howlAmount;
+
+        ptt.setEnabled (pttEnabled);
 
         if (std::abs (vintage01 - lastVintage) > 1.0e-4f)
         {
@@ -163,6 +174,12 @@ public:
             if (over > 0.0f)
                 s *= juce::Decibels::decibelsToGain (over * compSlope);
 
+            // keying relay. Detects on the limited programme, which is the same
+            // thing the real one would be watching, and returns 1 / 1 / 0 when
+            // the switch is off.
+            const auto key = ptt.tick (s);
+            s *= key.gate;
+
             // feedback howl
             if (howlAmt > 0.001f)
             {
@@ -178,17 +195,21 @@ public:
             }
 
             // hiss and mains buzz, injected before the post filter so the horn
-            // colours them the same way it colours the programme
-            s += hissGain * (rng.nextFloat() * 2.0f - 1.0f);
+            // colours them the same way it colours the programme. `bed` is the
+            // channel being open — 1 whenever PTT is off.
+            s += key.bed * hissGain * (rng.nextFloat() * 2.0f - 1.0f);
 
             humPhase += humInc;
             if (humPhase > juce::MathConstants<float>::twoPi)
                 humPhase -= juce::MathConstants<float>::twoPi;
 
-            s += humGain * (0.35f * std::sin (humPhase)
-                          + 0.60f * std::sin (humPhase * 3.0f)
-                          + 0.45f * std::sin (humPhase * 5.0f)
-                          + 0.25f * std::sin (humPhase * 7.0f));
+            s += key.bed * humGain * (0.35f * std::sin (humPhase)
+                                    + 0.60f * std::sin (humPhase * 3.0f)
+                                    + 0.45f * std::sin (humPhase * 5.0f)
+                                    + 0.25f * std::sin (humPhase * 7.0f));
+
+            // the relay itself: after the gate, before the post filter
+            s += key.inject;
 
             s = postHpf.processSample (s);
             s = postLpf.processSample (s);
@@ -215,8 +236,9 @@ private:
     using Filter = juce::dsp::IIR::Filter<float>;
     using Delay  = juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear>;
 
-    Filter hpf, lpf, pk1, pk2, pk3, postHpf, postLpf, howlPk;
-    Delay  wobbleDelay { 4096 }, howlDelay { 8192 };
+    Filter  hpf, lpf, pk1, pk2, pk3, postHpf, postLpf, howlPk;
+    Delay   wobbleDelay { 4096 }, howlDelay { 8192 };
+    PttGate ptt;
     std::unique_ptr<juce::dsp::Oversampling<float>> oversampler;
     juce::Random rng;
 
