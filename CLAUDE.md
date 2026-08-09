@@ -1,9 +1,10 @@
 # TannoyBox — working notes
 
 A JUCE VST3/AU plugin that runs audio through a public address horn and the room
-it hangs in. The brief is "one job done perfectly": two large dials, four small
-ones, nothing else. Resist feature suggestions that widen the scope; there is a
-list at the bottom of README.md of things deliberately left out.
+it hangs in. The brief is "one job done perfectly": two large dials, five small
+ones, two switches, nothing else. Every one of those is a thing a real PA does —
+resist anything that is a thing a *plugin* does. There is a list at the bottom
+of README.md of things deliberately left out.
 
 ## Build
 
@@ -25,8 +26,10 @@ Debugging is far easier through `build/TannoyBox.sln` with the
 | Path | Contains |
 |---|---|
 | `Source/DSP/EraProfiles.h` | Every tonal constant for all four eras. Voicing changes happen here and nowhere else. |
-| `Source/DSP/HornBody.h` | Band-limiting, saturation, limiter, howl feedback, hiss and hum. Mono. |
-| `Source/DSP/SpaceEngine.h` | Predelay, four panned horn taps, allpass diffusion, 8-line Hadamard FDN, air absorption. Mono in, stereo out. |
+| `Source/DSP/HornBody.h` | Band-limiting, saturation, limiter, howl feedback, hiss and hum. Owns the PTT gate. Mono. |
+| `Source/DSP/PttGate.h` | Keying relay: gates programme and noise floor, injects the key click and release thump. |
+| `Source/DSP/Chime.h` | Four-note tubular chime, summed into the horn's input. |
+| `Source/DSP/SpaceEngine.h` | Predelay, four panned horn taps, allpass diffusion, 8-line Hadamard FDN, air absorption, and the ROOM balance. Mono in, stereo out. |
 | `Source/PluginProcessor.cpp` | Parameter definitions, mono summing, block plumbing. |
 | `Source/PluginEditor.cpp` | `Layout::` at the top is the single source of control geometry. |
 | `Source/UI/Assets.h` | Asset resolution by stem: skin folder before built-in, PNG before SVG. |
@@ -35,11 +38,31 @@ Debugging is far easier through `build/TannoyBox.sln` with the
 
 ## Things that will bite
 
-**Geometry is duplicated.** `Layout::` in `PluginEditor.cpp` positions the
-controls; the background artwork has the legends and control names baked in at
-matching coordinates. Nothing enforces agreement. Move a control and the
-lettering stays put. If the background is still the generated SVG, update
-`Tools/make_background.py` in the same commit and re-run it.
+**Geometry is duplicated three ways.** `Layout::` in `PluginEditor.cpp`
+positions the controls; the background artwork has the legends and control names
+baked in at matching coordinates; `Tools/make_preview.py` has its own copy for
+the HTML preview. Nothing enforces agreement. Move a control and the lettering
+stays put. If the background is still the generated SVG, update
+`Tools/make_background.py` and `Tools/make_preview.py` in the same commit and
+re-run both.
+
+The vertical budget at 640x480 is genuinely tight and the panel is laid out to
+the unit. Adding another row, or putting the small dials' captions back, means
+taking the space from somewhere — the large dials went from 196 to 180 to make
+room for the fifth small one. Render the panel and look at it before believing
+the arithmetic.
+
+**ROOM's centre must stay unity on both paths.** `SpaceEngine::setRoomAmount`
+is a crossfade whose midpoint is 1.0 on the direct arrival *and* 1.0 on the
+room, so ROOM at 50% is the untouched physical model and the output there is
+the exact sum of the two extremes. Sessions saved at the default depend on
+that. If you re-voice the crossfade, keep the midpoint.
+
+**The PTT gate must be an exact pass-through when switched off.** `PttGate`
+returns gate 1, bed 1, inject 0 with the switch off, which is what keeps the
+horn bit-identical to how it sounded before the gate existed. It crossfades
+rather than hard-bypassing so it can be automated. Both properties are easy to
+break and neither is audible until somebody opens an old session.
 
 **The plugin identity codes are frozen.** `PLUGIN_CODE Tnby` and
 `PLUGIN_MANUFACTURER_CODE Indl` in CMakeLists.txt must never change once
@@ -52,7 +75,15 @@ parameter has to go, leave the ID in place and stop reading it.
 
 **No allocation, locking or logging in `processBlock`.** IIR coefficients are
 deliberately rebuilt only when a dial actually moves, guarded by an epsilon
-check in `HornBody::setParameters`. Keep that pattern.
+check in `HornBody::setParameters`. Keep that pattern. `PttGate` and `Chime`
+hold no buffers at all for the same reason — the gate is a per-sample state
+machine and the chime is four fixed voices.
+
+**Smoothers are seeded in `prepareToPlay`, not left at zero.** A
+`SmoothedValue` starts at 0, so without the `setCurrentAndTargetValue` block
+every transport start ramps OUTPUT up from silence and sweeps VINTAGE across
+from MODERN. `SpaceEngine` does the same thing for ROOM with `blendPrimed`.
+Add a parameter, add it there too.
 
 **The `SpaceEngine` buffers are sized in `prepare`.** `SIZE` scales delay times
 within already-allocated lines; it must never ask for a longer delay than the

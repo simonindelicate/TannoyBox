@@ -2,7 +2,7 @@
 
 A VST3/AU plugin that puts an audio source through a public address horn and the
 room it is hanging in. One job: make a voice sound like it is coming out of a
-tannoy. Two large dials, four small ones, nothing else.
+tannoy. Two large dials, five small ones, two switches, nothing else.
 
 ---
 
@@ -40,22 +40,25 @@ the horn, because a PA is one amplifier driving one loudspeaker. Stereo only
 comes back at the room stage.
 
 ```
-input ─┬─────────────────────────────── dry ──────────────────┐
-       └─ sum to mono                                         │
-            │                                                 │
-            ├─ HORN  pre band-limit ─ formant bells ─ wobble   │
-            │        ─ [4x oversampled saturation]            │
-            │        ─ line-amp limiter ─ howl ─ hiss+hum      │
-            │        ─ post band-limit ─ DC block             │
-            │                                                 │
-            └─ ROOM  predelay ─ 4 panned horn taps            │
-                     ─ 4 allpass diffusers                    │
-                     ─ 8-line Hadamard FDN ─ air absorption ──┤
-                                                              │
-                                                     mix ─ output
+input ─┬───────────────────────────────────── dry ────────────────┐
+       └─ sum to mono ─ + chime                                   │
+            │                                                     │
+            ├─ HORN  pre band-limit ─ formant bells ─ wobble       │
+            │        ─ [4x oversampled saturation]                │
+            │        ─ line-amp limiter ─ PTT gate ─ howl         │
+            │        ─ hiss + hum ─ key click / release thump     │
+            │        ─ post band-limit ─ DC block                 │
+            │                                                     │
+            └─ SPACE predelay ─┬─ direct arrival ────────── x(1-r)┤
+                               └─ 4 panned horn taps              │
+                                  ─ 4 allpass diffusers           │
+                                  ─ 8-line Hadamard FDN           │
+                                  ─ air absorption ──────────  x(r)┤
+                                                                  │
+                                                         mix ─ output
 ```
 
-Two details that do most of the convincing work:
+Three details that do most of the convincing work:
 
 **Band-limiting on both sides of the distortion.** The horn only gets fed what
 it can reproduce, and the distortion products are then trapped inside the same
@@ -65,6 +68,12 @@ passband. Skip the second filter and it sounds like a fuzz pedal.
 delayed, panned, progressively duller copies arrive before the tail does, and
 that comb-flutter is what the ear reads as "station announcement" rather than
 "reverb plugin".
+
+**The chime and the key noise go through the horn, not around it.** Both are
+injected inside the chain — the chime at the horn's input, the click and thump
+after the keying gate but before the post band-limit — so they are band-limited
+and saturated by whatever era you are on. A chime mixed in afterwards sounds
+like a chime with a PA behind it; this sounds like a PA.
 
 ---
 
@@ -76,8 +85,62 @@ that comb-flutter is what the ear reads as "station announcement" rather than
 | **SIZE** | 5 m → 115 m | One physical variable — distance to the far wall. Predelay, tap spacing, tap level, RT60, damping and air absorption all follow from it. |
 | DRIVE | ±12 dB | Trim into the saturator, on top of the era's own drive. |
 | HOWL | 0–100% | Feedback resonance on the strongest formant. A limiter inside the loop keeps it musical rather than destructive. Leave at 0 for straight work. |
+| ROOM | HORN ONLY → ROOM ONLY | How much of the horn's own direct arrival you keep against the room around it. See below. |
 | MIX | 0–100% | Dry/PA blend. |
 | OUTPUT | −24 → +12 dB | Make-up. |
+| PTT | switch | Keying gate. Off by default. |
+| CHIME | momentary | Fires the four-note phrase. |
+
+### ROOM
+
+The two ends of this dial are two different jobs, and the centre is the
+physical model left alone:
+
+| Position | What you get |
+|---|---|
+| **0 %** — HORN ONLY | The horn's direct arrival and nothing else. No taps, no tail. SIZE still sets the time of flight, so a distant horn is still late and still dull, but there is no room around it. |
+| **50 %** | Direct arrival and room both at unity: exactly what the physical model produces on its own, and what the plugin did before the dial existed. |
+| **100 %** — ROOM ONLY | Taps and tail with no direct arrival at all. This is the position for a send/return: put TannoyBox on an aux, MIX at 100 %, and the dry track keeps its own front-and-centre while the horn's room arrives around it. |
+
+Below the centre it is a level control on the room; above it, it fades the
+direct arrival out from underneath. The centre is unity on both, so the output
+at 50 % is the exact sum of the output at 0 % and at 100 %.
+
+Note what ROOM does *not* do: it never removes the predelay. Time of flight
+belongs to SIZE. A horn 115 m away is 100 ms late whether or not you want to
+hear the building it is in, and pulling that out with ROOM would make the dial
+a delay control by the back door.
+
+### PTT
+
+Silence between announcements is not silent, and it does not start or stop
+cleanly. With the switch on, the horn's hiss and hum only exist while the
+channel is open, a key click lands as the phrase starts, and about half a
+second after it ends the channel drops out with a thump and takes the noise
+floor with it. Gaps shorter than ~350 ms do not close it, so it does not
+chatter between words.
+
+It keys off the programme, so a chime opens it too — hiss, then ding, then
+speech, which is the right order.
+
+One honest limitation: there is no lookahead, so the key click lands *with* the
+start of the phrase rather than a beat before it. Everything on the trailing
+side — the hold, the thump, the noise bed fading out behind it — is exact.
+Turning the switch off crossfades back to unity over 30 ms rather than
+hard-bypassing, so it is safe to automate.
+
+### CHIME
+
+Four notes, the Westminster quarter, struck as inharmonic tubular-bell partials
+and fed into the horn's input so the era voicing gets at them. The fundamental
+is G♯4 at 415 Hz, which barely survives the 1950s profile's 350 Hz high-pass —
+what you hear is mostly the second and third partials, which is exactly what a
+real one sounds like through a horn.
+
+The button is momentary and it drives a parameter, so a host can fire it from
+automation; the phrase restarts from the top if you hit it while it is ringing.
+It arrives before MIX, so at MIX 0 % you hear nothing — it is part of the PA,
+not a layer on top of it.
 
 ### The four era profiles
 
@@ -115,12 +178,17 @@ reopening the plugin window is enough to see a change — no rebuild.
 
 | Stem | Design size | Notes |
 |---|---|---|
-| `background` | 640 × 480 | The whole panel, **including all static lettering**. Author PNGs at 2× (1280 × 960). |
-| `knob_large` | 196 × 196 | Filmstrip or single frame — see below. |
+| `background` | 640 × 480 | The whole panel, **including all static lettering**, and the legends under the two switches. Author PNGs at 2× (1280 × 960). |
+| `knob_large` | 180 × 180 | Filmstrip or single frame — see below. |
 | `knob_small` | 64 × 64 | Used automatically for controls under 100 px. |
-| `knob_pointer` | 196 × 196 | Only used when the knob art is a single frame. Must point straight up at rest. |
-| `logo` | 240 × 52 | Drawn at 26,20. |
+| `knob_pointer` | 180 × 180 | Only used when the knob art is a single frame. Must point straight up at rest. |
+| `logo` | 240 × 52 | Drawn at 26,16. |
 | `nameplate` | 116 × 180 | Readout window. Keep y 26–116 clear; the plugin writes live text there. |
+
+The PTT and CHIME switches have no asset. They are drawn in code at 436,18 and
+528,18, both 80 × 38, because they are lit from their parameters and an asset
+would need at least two states. The background carries their legends; the
+plugin draws the cap and the lamp over the top.
 
 ### Knob filmstrips
 
@@ -140,13 +208,15 @@ the quick version, not the best version — a fixed light source, with only the
 knob body rotating, is what makes commercial knobs look solid, and that has to
 come from your renderer.
 
-**Preview without building anything:** open `Tools/panel-preview.html`. It
-renders the panel with working dials, and you can drag a replacement file onto
-the page to see it in place immediately.
+**Preview without building anything:** run `python3 Tools/make_preview.py` and
+open the `Tools/panel-preview.html` it writes. It renders the panel with working
+dials, and you can drag a replacement file onto the page to see it in place
+immediately. The file is generated, not checked in, so re-run the script after
+changing any of the artwork.
 
-If you move a control, the coordinates live in two places that must agree:
-`Layout::` at the top of `Source/PluginEditor.cpp`, and the constants in
-`Tools/make_background.py`.
+If you move a control, the coordinates live in three places that must agree:
+`Layout::` at the top of `Source/PluginEditor.cpp`, the constants in
+`Tools/make_background.py`, and the `controls` table in `Tools/make_preview.py`.
 
 ---
 
@@ -209,13 +279,12 @@ would add:
 - **Impulse response slot.** A convolver in place of the horn's EQ section,
   fed by a real horn IR, with VINTAGE still driving the distortion and noise.
   This is the one change that would take it from convincing to indistinguishable.
-- **Chime.** A two- or four-note tubular ding on a trigger, through the same
-  horn path. The single most recognisable part of the sound and it costs almost
-  nothing.
 - **Ducking sidechain.** Announcements over music, with the music pulled down
   by the horn's own envelope.
-- **PTT gate.** Key click, a beat of hum and hiss on either side of the phrase,
-  release thump. Silence between announcements is not silent in real life.
+- **Lookahead on the PTT gate.** Would put the key click a beat *before* the
+  phrase instead of on top of it, which is where a real one is. Costs a fixed
+  reported latency on every instance whether the gate is switched on or not,
+  which is why it is not there.
 - **Handheld / horn / column** speaker-type switch — a second axis to VINTAGE
   rather than more of the same one.
 - **Era-linked convolution of the taps** so distant horns are not just filtered
