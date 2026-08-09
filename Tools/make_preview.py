@@ -25,12 +25,13 @@ for n in names:
 
 # design-space geometry, mirroring Layout:: in PluginEditor.cpp
 controls = [
-    ("vintage", "knob_large.svg", 46, 116, 196, 196, 0.72),
-    ("size", "knob_large.svg", 398, 116, 196, 196, 0.40),
-    ("drive", "knob_small.svg", 64, 372, 64, 64, 0.5),
-    ("howl", "knob_small.svg", 213, 372, 64, 64, 0.0),
-    ("mix", "knob_small.svg", 363, 372, 64, 64, 1.0),
-    ("output", "knob_small.svg", 512, 372, 64, 64, 0.66),
+    ("vintage", "knob_large.svg", 54, 124, 180, 180, 0.72),
+    ("size", "knob_large.svg", 406, 124, 180, 180, 0.40),
+    ("drive", "knob_small.svg", 68, 368, 64, 64, 0.5),
+    ("howl", "knob_small.svg", 178, 368, 64, 64, 0.0),
+    ("room", "knob_small.svg", 288, 368, 64, 64, 0.5),
+    ("mix", "knob_small.svg", 398, 368, 64, 64, 1.0),
+    ("output", "knob_small.svg", 508, 368, 64, 64, 0.66),
 ]
 
 parts = []
@@ -54,9 +55,9 @@ parts.append("""<!DOCTYPE html>
 
 parts.append('<div class="layer" data-file="background.svg">%s</div>' % svgs["background.svg"])
 parts.append('<div class="layer" data-file="logo.svg" style="left:%.4f%%;top:%.4f%%;right:auto;bottom:auto;width:%.4f%%;height:%.4f%%">%s</div>'
-             % (26 / 640 * 100, 20 / 480 * 100, 240 / 640 * 100, 52 / 480 * 100, svgs["logo.svg"]))
+             % (26 / 640 * 100, 16 / 480 * 100, 240 / 640 * 100, 52 / 480 * 100, svgs["logo.svg"]))
 parts.append('<div class="layer" data-file="nameplate.svg" style="left:%.4f%%;top:%.4f%%;right:auto;bottom:auto;width:%.4f%%;height:%.4f%%">%s</div>'
-             % (262 / 640 * 100, 120 / 480 * 100, 116 / 640 * 100, 180 / 480 * 100, svgs["nameplate.svg"]))
+             % (262 / 640 * 100, 124 / 480 * 100, 116 / 640 * 100, 180 / 480 * 100, svgs["nameplate.svg"]))
 
 for cid, facefile, x, y, w, h, val in controls:
     parts.append(
@@ -100,6 +101,7 @@ function report(id, v) {
   const name = id === 'vintage'
       ? (t < 0.06 ? era[s] : t > 0.94 ? era[s + 1] : era[s] + ' > ' + era[s + 1])
       : id === 'size' ? Math.round(5 + 110 * v) + ' m'
+      : id === 'room' ? (v < 0.005 ? 'HORN ONLY' : v > 0.995 ? 'ROOM ONLY' : Math.round(v * 100) + '%')
       : Math.round(v * 100) + '%';
   document.getElementById('hint').textContent = id + ' — ' + name;
 }

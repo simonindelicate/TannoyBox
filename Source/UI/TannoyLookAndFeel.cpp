@@ -114,3 +114,56 @@ void TannoyLookAndFeel::drawRotarySlider (juce::Graphics& g, int x, int y, int w
         }
     }
 }
+
+void TannoyLookAndFeel::drawSwitch (juce::Graphics& g, juce::Rectangle<float> bounds,
+                                    const juce::String& text, bool lit,
+                                    bool highlighted, bool down)
+{
+    const float radius = juce::jmin (7.0f, bounds.getHeight() * 0.24f);
+
+    // recess the switch sits in
+    g.setColour (Palette::ink.withAlpha (0.55f));
+    g.fillRoundedRectangle (bounds, radius);
+    g.setColour (Palette::moss.withAlpha (highlighted ? 0.55f : 0.30f));
+    g.drawRoundedRectangle (bounds.reduced (0.5f), radius, 1.0f);
+
+    // the cap, pressed in slightly while held
+    auto cap = bounds.reduced (bounds.getHeight() * 0.15f);
+    g.setColour (down ? Palette::panel.darker (0.25f) : Palette::panel.brighter (0.06f));
+    g.fillRoundedRectangle (cap, radius * 0.7f);
+    g.setColour (Palette::ink.withAlpha (0.45f));
+    g.drawRoundedRectangle (cap.reduced (0.5f), radius * 0.7f, 1.0f);
+
+    cap = cap.reduced (cap.getHeight() * 0.16f);
+
+    // indicator lamp
+    auto lamp = cap.removeFromLeft (cap.getHeight());
+    g.setColour (lit ? Palette::rust.brighter (0.30f) : Palette::ink.brighter (0.06f));
+    g.fillEllipse (lamp.reduced (lamp.getWidth() * 0.20f));
+
+    if (lit)
+    {
+        g.setColour (Palette::rust.withAlpha (0.30f));
+        g.drawEllipse (lamp.reduced (lamp.getWidth() * 0.06f), lamp.getWidth() * 0.12f);
+    }
+
+    g.setColour (Palette::cream.withAlpha (lit ? 1.0f : 0.70f));
+    g.setFont (stencil (juce::jmax (7.0f, cap.getHeight() * 0.62f), true));
+    g.drawFittedText (text, cap.toNearestInt(), juce::Justification::centred, 1, 0.7f);
+}
+
+void TannoyLookAndFeel::drawToggleButton (juce::Graphics& g, juce::ToggleButton& b,
+                                          bool highlighted, bool down)
+{
+    drawSwitch (g, b.getLocalBounds().toFloat(), b.getButtonText(),
+                b.getToggleState(), highlighted, down);
+}
+
+void TannoyLookAndFeel::drawButtonBackground (juce::Graphics& g, juce::Button& b,
+                                              const juce::Colour&, bool highlighted, bool down)
+{
+    // Momentary buttons have no toggle state of their own; CHIME's is driven
+    // from its parameter so host automation lights the lamp too.
+    drawSwitch (g, b.getLocalBounds().toFloat(), b.getButtonText(),
+                b.getToggleState() || down, highlighted, down);
+}

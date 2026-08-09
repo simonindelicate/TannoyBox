@@ -26,12 +26,18 @@
 
     background      640 x 480 design units. Author PNGs at 2x (1280 x 960) —
                     the panel is downscaled to the window, and downscaling looks
-                    fine where upscaling does not.
-    logo            240 x 52     drawn at 26,20
-    nameplate       116 x 180    drawn at 262,120; keep y 26..116 clear
-    knob_large      see below
-    knob_small      see below
+                    fine where upscaling does not. All the static lettering
+                    lives here, including the legends under the two switches.
+    logo            240 x 52     drawn at 26,16
+    nameplate       116 x 180    drawn at 262,124; keep y 26..116 clear
+    knob_large      180 x 180 when square — see below
+    knob_small      64 x 64 when square — used for controls under 100 px
     knob_pointer    only used when the knob art is a single static frame
+
+    The PTT and CHIME switches are drawn in code rather than from assets, at
+    436,18 and 528,18, both 80 x 38. They are lit from their parameters, so an
+    asset would have to come in at least two states; the background artwork
+    carries their legends and the plugin draws the cap and lamp on top.
 
     ------------------------------------------------------------- knob strategy
 

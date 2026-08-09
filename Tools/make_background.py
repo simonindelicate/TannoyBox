@@ -23,7 +23,11 @@ FONT = "font-family=\"Helvetica Neue, Helvetica, Arial, sans-serif\""
 # knob geometry must match Layout:: in PluginEditor.cpp
 VINTAGE_C = (144, 214)
 SIZE_C = (496, 214)
-KNOB_R = 98
+KNOB_R = 90
+TICK_R = KNOB_R + 26
+HEADER_Y = 86
+DIVIDER_Y = 356
+SMALL_C = [100, 210, 320, 430, 540]
 START, END = 1.25 * math.pi, 2.75 * math.pi
 
 out = []
@@ -71,20 +75,26 @@ for (sx, sy) in [(20, 20), (W - 20, 20), (20, H - 20), (W - 20, H - 20)]:
     a(f'<line x1="{sx-3}" y1="{sy-3}" x2="{sx+3}" y2="{sy+3}" stroke="{INK}" stroke-width="1.4"/>')
 
 # ---------------------------------------------------------------- header
-a('<!-- BRANDING ZONE: 0,0 640x92. logo.svg is drawn at 26,20 240x52 -->')
-a(f'<rect x="0" y="0" width="{W}" height="92" fill="{INK}" fill-opacity="0.28"/>')
-a(f'<line x1="16" y1="92" x2="{W-16}" y2="92" stroke="{MOSS}" stroke-opacity="0.35" stroke-width="1"/>')
+a(f'<!-- BRANDING ZONE: 0,0 640x{HEADER_Y}. logo.svg is drawn at 26,16 240x52 -->')
+a(f'<rect x="0" y="0" width="{W}" height="{HEADER_Y}" fill="{INK}" fill-opacity="0.28"/>')
+a(f'<line x1="16" y1="{HEADER_Y}" x2="{W-16}" y2="{HEADER_Y}" stroke="{MOSS}" stroke-opacity="0.35" stroke-width="1"/>')
 
-# perforated grille to the right of the logo
+# perforated grille, between the logo and the switches
 a('<g id="grille" fill="' + INK + '" fill-opacity="0.5">')
-for row in range(5):
-    for col in range(27):
+for row in range(4):
+    for col in range(11):
         cx = 300 + col * 11.6
-        cy = 24 + row * 11.0 + (5.8 if row % 2 else 0)
-        if cx < 616:
+        cy = 22 + row * 11.0 + (5.8 if row % 2 else 0)
+        if cx < 424:
             a(f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="2.6"/>')
 a('</g>')
-label(W - 26, 82, "PUBLIC ADDRESS PROCESSOR", 8, MOSS, "end", op=0.9)
+label(28, 80, "PUBLIC ADDRESS PROCESSOR", 8, MOSS, "start", op=0.9)
+
+# switch legends. The switches themselves are drawn by the plugin into these
+# rectangles — see Layout:: in PluginEditor.cpp.
+for sx, sw, nm in [(436, 80, "MIC KEY"), (528, 80, "STATION CHIME")]:
+    a(f'<rect x="{sx-5}" y="13" width="{sw+10}" height="48" rx="7" fill="{INK}" fill-opacity="0.18"/>')
+    label(sx + sw / 2, 72, nm, 7, MOSS, "middle", op=0.95)
 
 # ---------------------------------------------------------------- knob engraving
 def knob_engraving(centre, name, caption, ticks):
@@ -96,43 +106,48 @@ def knob_engraving(centre, name, caption, ticks):
     n = len(ticks)
     for i, txt in enumerate(ticks):
         t = i / (n - 1)
-        x, y = polar(centre, KNOB_R + 26, t)
+        x, y = polar(centre, TICK_R, t)
         label(x, y + 3, txt, 9, CREAM, "middle", op=0.85)
 
-    label(cx, cy + KNOB_R + 44, name, 15, CREAM, "middle", "bold")
-    label(cx, cy + KNOB_R + 60, caption, 8, MOSS, "middle", op=0.95)
+    label(cx, cy + KNOB_R + 30, name, 15, CREAM, "middle", "bold")
+    label(cx, cy + KNOB_R + 42, caption, 8, MOSS, "middle", op=0.95)
 
 
 knob_engraving(VINTAGE_C, "VINTAGE", "ERA PROFILE",
                ["MODERN", "1970s", "1960s", "1950s"])
-knob_engraving(SIZE_C, "SIZE", "DISTANCE &#183; TAIL",
-               ["5", "30", "60", "90", "115"])
-label(SIZE_C[0], SIZE_C[1] - KNOB_R - 40, "METRES", 8, MOSS, "middle", op=0.8)
+
+# Four index legends, not five. The middle of an odd number of them lands dead
+# above the dial, which is exactly where the header rule is; the unit moved into
+# the caption at the same time.
+knob_engraving(SIZE_C, "SIZE", "METRES &#183; DISTANCE &amp; TAIL",
+               ["5", "40", "80", "115"])
 
 # ---------------------------------------------------------------- readout recess
-a('<!-- READOUT WINDOW: nameplate.svg is drawn at 262,120 116x180 -->')
-a(f'<rect x="256" y="114" width="128" height="192" rx="4" fill="{INK}" fill-opacity="0.35"/>')
-a(f'<rect x="256" y="114" width="128" height="192" rx="4" fill="none" stroke="{MOSS}" stroke-opacity="0.25"/>')
+a('<!-- READOUT WINDOW: nameplate.svg is drawn at 262,124 116x180 -->')
+a(f'<rect x="256" y="118" width="128" height="192" rx="4" fill="{INK}" fill-opacity="0.35"/>')
+a(f'<rect x="256" y="118" width="128" height="192" rx="4" fill="none" stroke="{MOSS}" stroke-opacity="0.25"/>')
 
 # ---------------------------------------------------------------- lower deck
-a(f'<line x1="16" y1="356" x2="{W-16}" y2="356" stroke="{MOSS}" stroke-opacity="0.35" stroke-width="1"/>')
-a(f'<rect x="0" y="356" width="{W}" height="{H-356}" fill="{INK}" fill-opacity="0.18"/>')
+# Five 64px dials on 110px centres, 68..572. The second line of lettering under
+# each one went when the fifth dial arrived: at this pitch there is no vertical
+# room for it above the panel border at y=470, and the row reads better without.
+a(f'<line x1="16" y1="{DIVIDER_Y}" x2="{W-16}" y2="{DIVIDER_Y}" stroke="{MOSS}" stroke-opacity="0.35" stroke-width="1"/>')
+a(f'<rect x="0" y="{DIVIDER_Y}" width="{W}" height="{H-DIVIDER_Y}" fill="{INK}" fill-opacity="0.18"/>')
 
-for cx, nm, cap in [(96, "DRIVE", "INPUT TRIM"), (245, "HOWL", "FEEDBACK"),
-                    (395, "MIX", "DRY / PA"), (544, "OUTPUT", "MAKE-UP")]:
-    a(f'<circle cx="{cx}" cy="404" r="44" fill="{INK}" fill-opacity="0.20"/>')
-    label(cx, 460, nm, 11, CREAM, "middle", "bold")
-    label(cx, 472, cap, 7, MOSS, "middle", op=0.9)
+for cx, nm in zip(SMALL_C, ["DRIVE", "HOWL", "ROOM", "MIX", "OUTPUT"]):
+    a(f'<circle cx="{cx}" cy="400" r="40" fill="{INK}" fill-opacity="0.20"/>')
+    label(cx, 456, nm, 11, CREAM, "middle", "bold")
 
 # ---------------------------------------------------------------- guides
 a('<g id="placeholder-guides" stroke="' + GUIDE + '" fill="none" stroke-width="1" stroke-dasharray="5 4" opacity="0.75">')
-for (gx, gy, gw, gh) in [(26, 20, 240, 52), (262, 120, 116, 180),
-                         (46, 116, 196, 196), (398, 116, 196, 196),
-                         (64, 372, 64, 64), (213, 372, 64, 64),
-                         (363, 372, 64, 64), (512, 372, 64, 64)]:
+GUIDES = [(26, 16, 240, 52), (262, 124, 116, 180),
+          (54, 124, 180, 180), (406, 124, 180, 180),
+          (436, 18, 80, 38), (528, 18, 80, 38)]
+GUIDES += [(cx - 32, 368, 64, 64) for cx in SMALL_C]
+for (gx, gy, gw, gh) in GUIDES:
     a(f'<rect x="{gx}" y="{gy}" width="{gw}" height="{gh}"/>')
 a('</g>')
-a(f'<text x="320" y="106" {FONT} font-size="8" fill="{GUIDE}" text-anchor="middle" '
+a(f'<text x="320" y="104" {FONT} font-size="8" fill="{GUIDE}" text-anchor="middle" '
   f'letter-spacing="1.5">PLACEHOLDER &#183; RESOURCES/BACKGROUND.SVG &#183; 640 &#215; 480</text>')
 
 a('</svg>')
