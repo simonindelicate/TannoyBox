@@ -89,7 +89,7 @@ void YellowcoatLookAndFeel::drawRotarySlider (juce::Graphics& g, int x, int y, i
         g.setColour (Palette::ink.withAlpha (0.6f));
         g.strokePath (track, juce::PathStrokeType (r * 0.055f, juce::PathStrokeType::curved,
                                                    juce::PathStrokeType::rounded));
-        g.setColour (Palette::rust);
+        g.setColour (Palette::amber);
         g.strokePath (value, juce::PathStrokeType (r * 0.055f, juce::PathStrokeType::curved,
                                                    juce::PathStrokeType::rounded));
     }
@@ -143,14 +143,15 @@ void YellowcoatLookAndFeel::drawSwitch (juce::Graphics& g, juce::Rectangle<float
 
     cap = cap.reduced (cap.getHeight() * 0.16f);
 
-    // indicator lamp
+    // indicator lamp. Lit is the same phosphor green as the readout window;
+    // unlit is a dead bulb, not a dim one.
     auto lamp = cap.removeFromLeft (cap.getHeight());
-    g.setColour (lit ? Palette::rust.brighter (0.30f) : Palette::ink.brighter (0.06f));
+    g.setColour (lit ? Palette::crt : Palette::ink.brighter (0.06f));
     g.fillEllipse (lamp.reduced (lamp.getWidth() * 0.20f));
 
     if (lit)
     {
-        g.setColour (Palette::rust.withAlpha (0.30f));
+        g.setColour (Palette::crt.withAlpha (0.30f));
         g.drawEllipse (lamp.reduced (lamp.getWidth() * 0.06f), lamp.getWidth() * 0.12f);
     }
 

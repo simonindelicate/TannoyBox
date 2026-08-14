@@ -124,11 +124,18 @@ namespace Assets
     }
 }
 
+/*  Anything the plugin draws over the artwork has to agree with it, so these
+    are the skin's colours rather than a scheme of their own. Two of them are
+    load-bearing: `amber` is the skin's yellow and must match it exactly, and
+    `crt` is the phosphor green shared by the readout window and the switch
+    lamps — the two things on the panel that are lit rather than painted.    */
 namespace Palette
 {
     const juce::Colour panel { 0xff2e332e };   // hammertone grey-green
     const juce::Colour ink   { 0xff171a17 };   // stencil black
     const juce::Colour cream { 0xffd8cfb8 };   // painted lettering
-    const juce::Colour rust  { 0xffb24a28 };   // oxblood accent
+    const juce::Colour amber { 0xfffcb041 };   // the skin's yellow — dial arcs
+    const juce::Colour crt   { 0xff33ff33 };   // phosphor green — readout, lamps
+    const juce::Colour rust  { 0xffb24a28 };   // oxblood, in the placeholder art
     const juce::Colour moss  { 0xff7e8a7b };   // engraved highlight
 }

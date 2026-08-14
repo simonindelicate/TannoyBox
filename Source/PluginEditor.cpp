@@ -184,12 +184,14 @@ void YellowcoatEditor::paint (juce::Graphics& g)
 
     auto text = plate.reduced (juce::roundToInt (10 * k), juce::roundToInt (26 * k));
 
-    g.setColour (flashing ? Palette::cream : Palette::rust.brighter (0.35f));
+    // Phosphor green, and brighter for the moment after you touch something —
+    // the window is the one part of the panel that is lit rather than painted.
+    g.setColour (flashing ? Palette::crt.brighter (0.30f) : Palette::crt);
     g.setFont (YellowcoatLookAndFeel::stencil (17.0f * k, true));
     g.drawFittedText (line1, text.removeFromTop (juce::roundToInt (56 * k)),
                       juce::Justification::centred, 2, 0.7f);
 
-    g.setColour (Palette::cream.withAlpha (0.78f));
+    g.setColour (Palette::crt.withAlpha (0.72f));
     g.setFont (YellowcoatLookAndFeel::stencil (14.0f * k));
     g.drawFittedText (line2, text.removeFromTop (juce::roundToInt (34 * k)),
                       juce::Justification::centred, 1, 0.7f);
