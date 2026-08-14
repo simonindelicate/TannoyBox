@@ -182,7 +182,11 @@ void YellowcoatEditor::paint (juce::Graphics& g)
         line2 = juce::String (juce::roundToInt (5.0 + 110.0 * size.getValue())) + " m";
     }
 
-    auto text = plate.reduced (juce::roundToInt (10 * k), juce::roundToInt (26 * k));
+    // 18 units of side padding, not 10. The nameplate's glass frame is inset 6
+    // from its own edge, so at 10 the longest strings — "1960s > 1950s", or the
+    // era name when it arrives on the second line — came within 4 units of it
+    // and read as overflowing. At 18 the tightest case clears by 13.
+    auto text = plate.reduced (juce::roundToInt (18 * k), juce::roundToInt (26 * k));
 
     // Phosphor green, and brighter for the moment after you touch something —
     // the window is the one part of the panel that is lit rather than painted.
@@ -191,10 +195,12 @@ void YellowcoatEditor::paint (juce::Graphics& g)
     g.drawFittedText (line1, text.removeFromTop (juce::roundToInt (56 * k)),
                       juce::Justification::centred, 2, 0.7f);
 
+    // Two lines, like the first. Touching VINTAGE puts an era name down here,
+    // and on one line the narrower box truncates it to an ellipsis.
     g.setColour (Palette::crt.withAlpha (0.72f));
     g.setFont (YellowcoatLookAndFeel::stencil (14.0f * k));
-    g.drawFittedText (line2, text.removeFromTop (juce::roundToInt (34 * k)),
-                      juce::Justification::centred, 1, 0.7f);
+    g.drawFittedText (line2, text.removeFromTop (juce::roundToInt (40 * k)),
+                      juce::Justification::centred, 2, 0.7f);
 }
 
 void YellowcoatEditor::resized()

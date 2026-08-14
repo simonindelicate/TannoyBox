@@ -2,11 +2,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="116" height="180" viewBox="0 0 116 180">
 <!-- ==========================================================================
      Yellowcoat — PLACEHOLDER READOUT WINDOW (116 x 180)
-     Drawn at 262,120 in the 640x480 panel.
+     Drawn at 262,124 in the 640x480 panel.
 
      The plugin writes two lines of live text over the middle of this frame:
        line 1 (era / touched control name)  ~ y  26..82
-       line 2 (metres / value)              ~ y  82..116
+       line 2 (metres / value)              ~ y  82..122
      Keep that area clear in any replacement.
      ========================================================================== -->
 
@@ -25,11 +25,6 @@
 <g fill="#b24a28" fill-opacity="0.7">
   <rect x="18" y="14" width="80" height="2"/>
   <rect x="18" y="164" width="80" height="2"/>
-</g>
-
-<g font-family="Helvetica Neue, Helvetica, Arial, sans-serif" text-anchor="middle">
-  <text x="58" y="132" font-size="7" fill="#7e8a7b" letter-spacing="1.6">ANNOUNCING</text>
-  <text x="58" y="152" font-size="7" fill="#7e8a7b" letter-spacing="1.6" fill-opacity="0.7">TYPE 4/3</text>
 </g>
 
 <g id="placeholder-guides">
