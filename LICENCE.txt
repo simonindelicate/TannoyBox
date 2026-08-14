@@ -1,4 +1,4 @@
-TannoyBox
+Yellowcoat
 Copyright (c) 2026 Simon Indelicate
 
 Replace this file with whatever licence you want. It exists because the Inno

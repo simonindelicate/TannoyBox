@@ -1,8 +1,9 @@
-# TannoyBox
+# Yellowcoat
 
 A VST3/AU plugin that puts an audio source through a public address horn and the
 room it is hanging in. One job: make a voice sound like it is coming out of a
-tannoy. Two large dials, five small ones, two switches, nothing else.
+public address system. Two large dials, five small ones, two switches,
+nothing else.
 
 ---
 
@@ -23,13 +24,13 @@ cmake -B build -G "Visual Studio 17 2022" -A x64
 cmake --build build --config Release
 ```
 
-Output lands in `build/TannoyBox_artefacts/Release/` and, because
+Output lands in `build/Yellowcoat_artefacts/Release/` and, because
 `COPY_PLUGIN_AFTER_BUILD` is on, is also installed to your system plugin folder.
 Build the Standalone target first to audition without a host.
 
 Pinned to JUCE 8.0.4. It compiles against JUCE 7 as well — the one
 version-sensitive call is font construction, which is already guarded in
-`TannoyLookAndFeel::stencil()`.
+`YellowcoatLookAndFeel::stencil()`.
 
 ---
 
@@ -64,7 +65,7 @@ Three details that do most of the convincing work:
 it can reproduce, and the distortion products are then trapped inside the same
 passband. Skip the second filter and it sounds like a fuzz pedal.
 
-**Discrete taps before the reverb.** A tannoy is never one speaker. Four
+**Discrete taps before the reverb.** A PA system is never one speaker. Four
 delayed, panned, progressively duller copies arrive before the tail does, and
 that comb-flutter is what the ear reads as "station announcement" rather than
 "reverb plugin".
@@ -100,7 +101,7 @@ physical model left alone:
 |---|---|
 | **0 %** — HORN ONLY | The horn's direct arrival and nothing else. No taps, no tail. SIZE still sets the time of flight, so a distant horn is still late and still dull, but there is no room around it. |
 | **50 %** | Direct arrival and room both at unity: exactly what the physical model produces on its own, and what the plugin did before the dial existed. |
-| **100 %** — ROOM ONLY | Taps and tail with no direct arrival at all. This is the position for a send/return: put TannoyBox on an aux, MIX at 100 %, and the dry track keeps its own front-and-centre while the horn's room arrives around it. |
+| **100 %** — ROOM ONLY | Taps and tail with no direct arrival at all. This is the position for a send/return: put Yellowcoat on an aux, MIX at 100 %, and the dry track keeps its own front-and-centre while the horn's room arrives around it. |
 
 Below the centre it is a level control on the room; above it, it fades the
 direct arrival out from underneath. The centre is unity on both, so the output
@@ -171,8 +172,8 @@ PNG beats SVG at every level, so migrating to bitmap artwork means dropping
 `background.png` into `Resources/` and rebuilding. The placeholder SVG is then
 simply never reached. Nothing needs deleting and no code changes.
 
-The skin folder is `~/Documents/TannoyBox/Skin/` (or
-`%USERPROFILE%\Documents\TannoyBox\Skin\`). It does not exist until you make
+The skin folder is `~/Documents/Yellowcoat/Skin/` (or
+`%USERPROFILE%\Documents\Yellowcoat\Skin\`). It does not exist until you make
 it. Files there override the built-in copies at load time, so closing and
 reopening the plugin window is enough to see a change — no rebuild.
 
@@ -228,28 +229,44 @@ Two things must never change once anything is public: `PLUGIN_CODE` and
 `PLUGIN_MANUFACTURER_CODE` in CMakeLists.txt, and the parameter ID strings in
 `ParamID`. Hosts identify the plugin by the former and write the latter into
 saved sessions. Changing either silently breaks every project anyone has made
-with it. Bump `project(TannoyBox VERSION ...)` for each release instead.
+with it. Bump `project(Yellowcoat VERSION ...)` for each release instead.
 
-### Windows
+### Windows — how this actually ships
 
-The build already links the MSVC runtime statically, so there is no Visual C++
-Redistributable for users to chase.
+**A zip containing the `Yellowcoat.vst3` folder, unsigned.** The note that goes
+with it says: drop the folder into `C:\Program Files\Common Files\VST3\` and
+rescan your plugins. That is the whole of it, and it is entirely normal for an
+independent PC plugin — a good many of the ones people actually use arrive
+exactly this way.
 
-The simplest distribution is a zip containing the `TannoyBox.vst3` folder and a
-one-paragraph note saying to drop it in `C:\Program Files\Common Files\VST3\`
-and rescan. That works, and plenty of small plugin developers do nothing more.
+Two things make it painless. The build links the MSVC runtime statically, so
+there is no Visual C++ Redistributable for anyone to chase. And a zip is not an
+installer, so SmartScreen has nothing to complain about at install time; the
+"Windows protected your PC" dialogue is a reaction to running an unsigned
+executable, which nobody is being asked to do. The VST3 is loaded by a host the
+user already trusts.
 
-`packaging/installer.iss` is a script for [Inno Setup](https://jrsoftware.org/isinfo.php),
-which is free. Build in Release, open the script, press Compile, and you get a
-single `.exe` that installs the VST3 and the standalone and registers an
-uninstaller. Considerably kinder to a non-technical user.
+`Yellowcoat.vst3` is a *folder*, not a file — zip the whole bundle, and check
+after unzipping that the structure survived:
 
-Unsigned, either route will make SmartScreen say "Windows protected your PC"
-and hide the Run button behind **More info**. Signing removes that, but a code
-signing certificate now has to live on a hardware token or cloud HSM, which
-puts it in the region of £200–400 a year through a reseller. Certum's
-open-source developer certificate is substantially cheaper if the project
-qualifies. Worth checking current prices — this market moves.
+```
+Yellowcoat.vst3\Contents\x86_64-win\Yellowcoat.vst3
+```
+
+**The standalone is not part of that.** It is built because it is the fastest
+way to audition a change without a host, and it stays a development tool.
+
+`packaging/installer.iss` is an Inno Setup script that would produce a
+single-file installer instead. It is kept working and is not the plan: an
+unsigned `.exe` is the one route that *does* trigger SmartScreen, which is a
+worse first impression than a zip. It is there if a future release ever wants
+it.
+
+Signing would remove the warning from that route, but a code signing
+certificate now has to live on a hardware token or cloud HSM — in the region
+of £200–400 a year through a reseller. Certum's open-source developer
+certificate is substantially cheaper if the project qualifies. Not worth it
+while the answer is a zip.
 
 ### macOS
 
@@ -266,10 +283,9 @@ It is a day of faff the first time and a two-line script forever after.
 
 ### Honest advice
 
-Ship unsigned to begin with, as a zip, with clear instructions and a note that
-the warning is expected. If people actually use it, pay for signing then. The
-Apple fee is the one worth paying first, because on macOS unsigned is closer to
-broken than to inconvenient.
+Windows ships as an unsigned zip and that is a finished answer, not a stopgap.
+macOS is the one where unsigned is closer to broken than to inconvenient, so if
+a Mac build ever goes out, the Apple fee is the one to pay first.
 
 ## Worth considering next
 

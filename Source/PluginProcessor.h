@@ -23,11 +23,11 @@ namespace ParamID
     static constexpr const char* chime   = "chime";
 }
 
-class TannoyBoxProcessor : public juce::AudioProcessor
+class YellowcoatProcessor : public juce::AudioProcessor
 {
 public:
-    TannoyBoxProcessor();
-    ~TannoyBoxProcessor() override = default;
+    YellowcoatProcessor();
+    ~YellowcoatProcessor() override = default;
 
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
     void releaseResources() override {}
@@ -37,7 +37,7 @@ public:
     juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override                          { return true; }
 
-    const juce::String getName() const override              { return "TannoyBox"; }
+    const juce::String getName() const override              { return "Yellowcoat"; }
     bool acceptsMidi() const override                        { return false; }
     bool producesMidi() const override                       { return false; }
     bool isMidiEffect() const override                       { return false; }
@@ -53,7 +53,7 @@ public:
     void setStateInformation (const void*, int) override;
 
     static juce::AudioProcessorValueTreeState::ParameterLayout createLayout();
-    juce::AudioProcessorValueTreeState apvts { *this, nullptr, "TANNOYBOX", createLayout() };
+    juce::AudioProcessorValueTreeState apvts { *this, nullptr, "YELLOWCOAT", createLayout() };
 
 private:
     HornBody    horn;
@@ -69,5 +69,5 @@ private:
 
     double sr = 44100.0;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TannoyBoxProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (YellowcoatProcessor)
 };

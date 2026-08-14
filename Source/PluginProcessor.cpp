@@ -1,14 +1,14 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-TannoyBoxProcessor::TannoyBoxProcessor()
+YellowcoatProcessor::YellowcoatProcessor()
     : AudioProcessor (BusesProperties()
         .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
         .withOutput ("Output", juce::AudioChannelSet::stereo(), true))
 {
 }
 
-juce::AudioProcessorValueTreeState::ParameterLayout TannoyBoxProcessor::createLayout()
+juce::AudioProcessorValueTreeState::ParameterLayout YellowcoatProcessor::createLayout()
 {
     using namespace juce;
     AudioProcessorValueTreeState::ParameterLayout layout;
@@ -69,7 +69,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout TannoyBoxProcessor::createLa
     return layout;
 }
 
-bool TannoyBoxProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
+bool YellowcoatProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
     const auto& out = layouts.getMainOutputChannelSet();
     const auto& in  = layouts.getMainInputChannelSet();
@@ -83,7 +83,7 @@ bool TannoyBoxProcessor::isBusesLayoutSupported (const BusesLayout& layouts) con
     return ! in.isDisabled();
 }
 
-void TannoyBoxProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
+void YellowcoatProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     sr = sampleRate;
 
@@ -120,7 +120,7 @@ void TannoyBoxProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     setLatencySamples (horn.getLatencySamples());
 }
 
-void TannoyBoxProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer&)
+void YellowcoatProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer&)
 {
     juce::ScopedNoDenormals noDenormals;
 
@@ -206,18 +206,18 @@ void TannoyBoxProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
     }
 }
 
-juce::AudioProcessorEditor* TannoyBoxProcessor::createEditor()
+juce::AudioProcessorEditor* YellowcoatProcessor::createEditor()
 {
-    return new TannoyBoxEditor (*this);
+    return new YellowcoatEditor (*this);
 }
 
-void TannoyBoxProcessor::getStateInformation (juce::MemoryBlock& destData)
+void YellowcoatProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
     if (auto xml = apvts.copyState().createXml())
         copyXmlToBinary (*xml, destData);
 }
 
-void TannoyBoxProcessor::setStateInformation (const void* data, int sizeInBytes)
+void YellowcoatProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     if (auto xml = getXmlFromBinary (data, sizeInBytes))
         if (xml->hasTagName (apvts.state.getType()))
@@ -226,5 +226,5 @@ void TannoyBoxProcessor::setStateInformation (const void* data, int sizeInBytes)
 
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
-    return new TannoyBoxProcessor();
+    return new YellowcoatProcessor();
 }

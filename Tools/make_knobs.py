@@ -23,7 +23,7 @@ def write(name, body, size):
     doc = [f'<?xml version="1.0" encoding="UTF-8"?>',
            f'<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" '
            f'viewBox="0 0 {size} {size}">',
-           f'<!-- TannoyBox placeholder: {name} ({size}x{size}) -->']
+           f'<!-- Yellowcoat placeholder: {name} ({size}x{size}) -->']
     doc += body
     doc.append('</svg>')
     path = os.path.join(here, "Resources", name)
@@ -83,6 +83,9 @@ def pointer(size):
     return b
 
 
-write("knob_large.svg", face(196, 18, True), 196)
+# 180, not 196: the large dials shrank when the fifth small one arrived. These
+# are scaled to fit whatever rectangle they land in, so the number is really
+# just the authoring size — but it should match Layout:: or it misleads.
+write("knob_large.svg", face(180, 18, True), 180)
 write("knob_small.svg", face(64, 12, False), 64)
-write("knob_pointer.svg", pointer(196), 196)
+write("knob_pointer.svg", pointer(180), 180)

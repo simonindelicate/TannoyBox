@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="196" height="196" viewBox="0 0 196 196">
-<!-- TannoyBox placeholder: knob_pointer.svg (196x196) -->
-<!-- must point UP at rest; it is rotated about (98.0, 98.0) -->
-<rect x="94.5" y="14.7" width="7.1" height="39.2" rx="3.5" fill="#d8cfb8"/>
-<circle cx="98.0" cy="61.7" r="4.3" fill="#b24a28"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180">
+<!-- Yellowcoat placeholder: knob_pointer.svg (180x180) -->
+<!-- must point UP at rest; it is rotated about (90.0, 90.0) -->
+<rect x="86.8" y="13.5" width="6.5" height="36.0" rx="3.2" fill="#d8cfb8"/>
+<circle cx="90.0" cy="56.7" r="4.0" fill="#b24a28"/>
 </svg>

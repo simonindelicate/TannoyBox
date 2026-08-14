@@ -1,4 +1,4 @@
-# TannoyBox — working notes
+# Yellowcoat — working notes
 
 A JUCE VST3/AU plugin that runs audio through a public address horn and the room
 it hangs in. The brief is "one job done perfectly": two large dials, five small
@@ -18,8 +18,8 @@ needs re-running when files are added or removed. On Windows the DAW must be
 closed before building, because the post-build step overwrites the installed
 VST3 and Windows locks loaded DLLs.
 
-Debugging is far easier through `build/TannoyBox.sln` with the
-**TannoyBox_Standalone** target set as startup project, than through a host.
+Debugging is far easier through `build/Yellowcoat.sln` with the
+**Yellowcoat_Standalone** target set as startup project, than through a host.
 
 ## Layout of the code
 
@@ -33,7 +33,7 @@ Debugging is far easier through `build/TannoyBox.sln` with the
 | `Source/PluginProcessor.cpp` | Parameter definitions, mono summing, block plumbing. |
 | `Source/PluginEditor.cpp` | `Layout::` at the top is the single source of control geometry. |
 | `Source/UI/Assets.h` | Asset resolution by stem: skin folder before built-in, PNG before SVG. |
-| `Source/UI/TannoyLookAndFeel.*` | Filmstrip or face+pointer knob drawing. |
+| `Source/UI/YellowcoatLookAndFeel.*` | Filmstrip or face+pointer knob drawing. |
 | `Tools/*.py` | Artwork generators. Not part of the build. |
 
 ## Things that will bite
@@ -106,7 +106,7 @@ what it sounded like rather than what was edited. Twenty small tweaks to
 ## Artwork
 
 Assets are referenced by stem — `background`, not `background.svg`. The loader
-prefers PNG over SVG and prefers `~/Documents/TannoyBox/Skin/` over the built-in
+prefers PNG over SVG and prefers `~/Documents/Yellowcoat/Skin/` over the built-in
 copies, so artwork can be iterated without rebuilding, and PNGs supersede the
 placeholder SVGs simply by existing. See the comment block at the top of
 `Source/UI/Assets.h` for sizes and the filmstrip convention.

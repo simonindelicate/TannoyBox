@@ -24,7 +24,7 @@
       3. FDN tail      — 8 delay lines, Hadamard feedback, damping in the loop
 
     The taps are what make it read as a public address system rather than a
-    reverb plugin: a tannoy is always several speakers at different distances.
+    reverb plugin: a PA system is always several speakers at different distances.
 
     ROOM decides how much of the output is room and how much is the horn's own
     direct arrival, with unity on both at the centre:

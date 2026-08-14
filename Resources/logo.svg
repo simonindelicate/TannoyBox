@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="240" height="52" viewBox="0 0 240 52">
 <!-- ==========================================================================
-     TannoyBox — PLACEHOLDER BRAND MARK (240 x 52)
-     Drawn at 26,20 in the 640x480 panel, scaled to fit and centred.
+     Yellowcoat — PLACEHOLDER BRAND MARK (240 x 52)
+     Drawn at 26,16 in the 640x480 panel, scaled to fit and centred.
      Swap this file for your own mark. Anything wider than 240x52 will be
      letterboxed rather than cropped.
      ========================================================================== -->
@@ -14,7 +14,7 @@
 </g>
 
 <g id="wordmark" font-family="Helvetica Neue, Helvetica, Arial, sans-serif">
-  <text x="52" y="28" font-size="22" font-weight="bold" fill="#d8cfb8" letter-spacing="2.4">TANNOYBOX</text>
+  <text x="52" y="28" font-size="22" font-weight="bold" fill="#d8cfb8" letter-spacing="2.4">YELLOWCOAT</text>
   <text x="53" y="42" font-size="8" fill="#7e8a7b" letter-spacing="2.8">HORN &#183; ROOM &#183; ERA</text>
 </g>
 

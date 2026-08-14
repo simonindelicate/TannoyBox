@@ -1,6 +1,6 @@
-#include "TannoyLookAndFeel.h"
+#include "YellowcoatLookAndFeel.h"
 
-TannoyLookAndFeel::TannoyLookAndFeel()
+YellowcoatLookAndFeel::YellowcoatLookAndFeel()
 {
     // Filmstrips first. If these turn out to be single square frames, or SVGs,
     // isStrip() stays false and we fall through to the face + pointer path.
@@ -16,7 +16,7 @@ TannoyLookAndFeel::TannoyLookAndFeel()
     setColour (juce::TooltipWindow::textColourId, Palette::cream);
 }
 
-juce::Font TannoyLookAndFeel::stencil (float height, bool bold)
+juce::Font YellowcoatLookAndFeel::stencil (float height, bool bold)
 {
    #if JUCE_MAJOR_VERSION >= 8
     auto f = juce::Font (juce::FontOptions().withHeight (height));
@@ -28,12 +28,12 @@ juce::Font TannoyLookAndFeel::stencil (float height, bool bold)
     return bold ? f.boldened() : f;
 }
 
-juce::Font TannoyLookAndFeel::getLabelFont (juce::Label& l)
+juce::Font YellowcoatLookAndFeel::getLabelFont (juce::Label& l)
 {
     return stencil (l.getHeight() * 0.72f);
 }
 
-void TannoyLookAndFeel::drawRotarySlider (juce::Graphics& g, int x, int y, int width, int height,
+void YellowcoatLookAndFeel::drawRotarySlider (juce::Graphics& g, int x, int y, int width, int height,
                                           float sliderPos, float startAngle, float endAngle,
                                           juce::Slider& slider)
 {
@@ -122,7 +122,7 @@ void TannoyLookAndFeel::drawRotarySlider (juce::Graphics& g, int x, int y, int w
     }
 }
 
-void TannoyLookAndFeel::drawSwitch (juce::Graphics& g, juce::Rectangle<float> bounds,
+void YellowcoatLookAndFeel::drawSwitch (juce::Graphics& g, juce::Rectangle<float> bounds,
                                     const juce::String& text, bool lit,
                                     bool highlighted, bool down)
 {
@@ -159,14 +159,14 @@ void TannoyLookAndFeel::drawSwitch (juce::Graphics& g, juce::Rectangle<float> bo
     g.drawFittedText (text, cap.toNearestInt(), juce::Justification::centred, 1, 0.7f);
 }
 
-void TannoyLookAndFeel::drawToggleButton (juce::Graphics& g, juce::ToggleButton& b,
+void YellowcoatLookAndFeel::drawToggleButton (juce::Graphics& g, juce::ToggleButton& b,
                                           bool highlighted, bool down)
 {
     drawSwitch (g, b.getLocalBounds().toFloat(), b.getButtonText(),
                 b.getToggleState(), highlighted, down);
 }
 
-void TannoyLookAndFeel::drawButtonBackground (juce::Graphics& g, juce::Button& b,
+void YellowcoatLookAndFeel::drawButtonBackground (juce::Graphics& g, juce::Button& b,
                                               const juce::Colour&, bool highlighted, bool down)
 {
     // Momentary buttons have no toggle state of their own; CHIME's is driven

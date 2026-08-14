@@ -37,7 +37,7 @@ controls = [
 parts = []
 parts.append("""<!DOCTYPE html>
 <meta charset="utf-8">
-<title>TannoyBox — panel preview</title>
+<title>Yellowcoat — panel preview</title>
 <style>
   html,body{margin:0;height:100%;background:#101210;display:grid;place-items:center;
             font:12px/1.4 "Helvetica Neue",Arial,sans-serif;color:#7e8a7b}

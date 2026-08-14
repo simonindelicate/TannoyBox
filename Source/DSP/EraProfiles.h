@@ -108,8 +108,8 @@ namespace Eras
     };
 
     // ------------------------------------------------------------------- 1950s
-    // Tannoy proper: narrow band, honking formants, hard-worked valve amp,
-    // audible mains and a driver that sags on transients.
+    // Public address proper: narrow band, honking formants, hard-worked valve
+    // amp, audible mains and a driver that sags on transients.
     static const EraProfile fifties
     {
         "1950s",

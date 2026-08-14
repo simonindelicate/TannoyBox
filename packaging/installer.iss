@@ -1,9 +1,9 @@
 ; ============================================================================
-; TannoyBox — Windows installer
+; Yellowcoat — Windows installer
 ;
 ; Build the plugin in Release first, then open this file in Inno Setup
 ; (free, from jrsoftware.org) and press Compile. Output lands in
-; packaging/output/TannoyBox-1.0.0-Windows.exe — one file to hand to someone
+; packaging/output/Yellowcoat-1.0.0-Windows.exe — one file to hand to someone
 ; who has never heard of GitHub.
 ;
 ; What it does: copies the VST3 bundle to the standard shared VST3 folder and
@@ -14,14 +14,14 @@
 ; downloading it, and what signing would cost.
 ; ============================================================================
 
-#define AppName        "TannoyBox"
+#define AppName        "Yellowcoat"
 #define AppVersion     "1.0.0"
 #define AppPublisher   "Indelicate Instruments"
 #define AppURL         "https://indelicates.xyz"
-#define BuildDir       "..\build\TannoyBox_artefacts\Release"
+#define BuildDir       "..\build\Yellowcoat_artefacts\Release"
 
 [Setup]
-AppId={{8A6F1C42-3D9E-4B77-9E21-TANNOYBOX001}
+AppId={{7E2CBC85-AF37-4D1B-A4C3-575A9702200B}
 AppName={#AppName}
 AppVersion={#AppVersion}
 AppPublisher={#AppPublisher}
@@ -67,4 +67,4 @@ Type: filesandordirs; Name: "{commoncf64}\VST3\{#AppName}.vst3"
 
 [Messages]
 ; Worth saying out loud, because the alternative is an email asking where it went.
-FinishedLabel=TannoyBox is installed.%n%nThe VST3 is in the shared plugin folder. Your DAW will not see it until you rescan plugins — in most hosts that is a button in the plugin preferences.
+FinishedLabel=Yellowcoat is installed.%n%nThe VST3 is in the shared plugin folder. Your DAW will not see it until you rescan plugins — in most hosts that is a button in the plugin preferences.

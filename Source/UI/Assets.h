@@ -19,8 +19,8 @@
     longer reached. Nothing needs deleting and nothing needs editing here.
 
     Skin folder:
-        ~/Documents/TannoyBox/Skin/                  (macOS / Linux)
-        %USERPROFILE%\Documents\TannoyBox\Skin\      (Windows)
+        ~/Documents/Yellowcoat/Skin/                  (macOS / Linux)
+        %USERPROFILE%\Documents\Yellowcoat\Skin\      (Windows)
 
     ---------------------------------------------------------------- asset list
 
@@ -65,7 +65,7 @@ namespace Assets
     inline juce::File skinFolder()
     {
         return juce::File::getSpecialLocation (juce::File::userDocumentsDirectory)
-                   .getChildFile ("TannoyBox")
+                   .getChildFile ("Yellowcoat")
                    .getChildFile ("Skin");
     }
 

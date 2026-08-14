@@ -34,7 +34,7 @@ namespace Layout
     static const int  smallX[5] { 68, 178, 288, 398, 508 };
 }
 
-TannoyBoxEditor::TannoyBoxEditor (TannoyBoxProcessor& p)
+YellowcoatEditor::YellowcoatEditor (YellowcoatProcessor& p)
     : AudioProcessorEditor (&p), proc (p)
 {
     setLookAndFeel (&lnf);
@@ -108,12 +108,12 @@ TannoyBoxEditor::TannoyBoxEditor (TannoyBoxProcessor& p)
     startTimerHz (24);
 }
 
-TannoyBoxEditor::~TannoyBoxEditor()
+YellowcoatEditor::~YellowcoatEditor()
 {
     setLookAndFeel (nullptr);
 }
 
-void TannoyBoxEditor::configure (juce::Slider& s, const char* paramID, const juce::String& readoutName)
+void YellowcoatEditor::configure (juce::Slider& s, const char* paramID, const juce::String& readoutName)
 {
     s.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
     s.setTextBoxStyle (juce::Slider::NoTextBox, false, 0, 0);
@@ -131,25 +131,25 @@ void TannoyBoxEditor::configure (juce::Slider& s, const char* paramID, const juc
     attachments.add (new juce::AudioProcessorValueTreeState::SliderAttachment (proc.apvts, paramID, s));
 }
 
-void TannoyBoxEditor::flash (const juce::String& name, const juce::String& value)
+void YellowcoatEditor::flash (const juce::String& name, const juce::String& value)
 {
     flashText  = name + "\n" + value;
     flashUntil = juce::Time::getMillisecondCounter() + 1400;
 }
 
-juce::Rectangle<int> TannoyBoxEditor::d (int x, int y, int w, int h) const noexcept
+juce::Rectangle<int> YellowcoatEditor::d (int x, int y, int w, int h) const noexcept
 {
     const float k = scale();
     return juce::Rectangle<int> (juce::roundToInt (x * k), juce::roundToInt (y * k),
                                  juce::roundToInt (w * k), juce::roundToInt (h * k));
 }
 
-juce::Rectangle<int> TannoyBoxEditor::d (juce::Rectangle<int> r) const noexcept
+juce::Rectangle<int> YellowcoatEditor::d (juce::Rectangle<int> r) const noexcept
 {
     return d (r.getX(), r.getY(), r.getWidth(), r.getHeight());
 }
 
-void TannoyBoxEditor::paint (juce::Graphics& g)
+void YellowcoatEditor::paint (juce::Graphics& g)
 {
     g.fillAll (Palette::panel);
     g.setImageResamplingQuality (juce::Graphics::highResamplingQuality);
@@ -185,17 +185,17 @@ void TannoyBoxEditor::paint (juce::Graphics& g)
     auto text = plate.reduced (juce::roundToInt (10 * k), juce::roundToInt (26 * k));
 
     g.setColour (flashing ? Palette::cream : Palette::rust.brighter (0.35f));
-    g.setFont (TannoyLookAndFeel::stencil (17.0f * k, true));
+    g.setFont (YellowcoatLookAndFeel::stencil (17.0f * k, true));
     g.drawFittedText (line1, text.removeFromTop (juce::roundToInt (56 * k)),
                       juce::Justification::centred, 2, 0.7f);
 
     g.setColour (Palette::cream.withAlpha (0.78f));
-    g.setFont (TannoyLookAndFeel::stencil (14.0f * k));
+    g.setFont (YellowcoatLookAndFeel::stencil (14.0f * k));
     g.drawFittedText (line2, text.removeFromTop (juce::roundToInt (34 * k)),
                       juce::Justification::centred, 1, 0.7f);
 }
 
-void TannoyBoxEditor::resized()
+void YellowcoatEditor::resized()
 {
     vintage.setBounds (d (Layout::knobVintage));
     size.setBounds    (d (Layout::knobSize));
@@ -210,7 +210,7 @@ void TannoyBoxEditor::resized()
                                 Layout::smallSize, Layout::smallSize));
 }
 
-void TannoyBoxEditor::timerCallback()
+void YellowcoatEditor::timerCallback()
 {
     // The chime lamp follows the parameter, not the mouse, so host automation
     // lights it too.

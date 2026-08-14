@@ -44,10 +44,10 @@ struct Filmstrip
     Buttons are drawn as recessed panel switches with an indicator lamp, lit
     from the toggle state. Both the toggle and the text-button paths go through
     drawSwitch, so PTT and CHIME sit at exactly the same height. */
-class TannoyLookAndFeel : public juce::LookAndFeel_V4
+class YellowcoatLookAndFeel : public juce::LookAndFeel_V4
 {
 public:
-    TannoyLookAndFeel();
+    YellowcoatLookAndFeel();
 
     void drawRotarySlider (juce::Graphics&, int x, int y, int width, int height,
                            float sliderPos, float rotaryStartAngle,

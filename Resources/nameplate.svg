@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="116" height="180" viewBox="0 0 116 180">
 <!-- ==========================================================================
-     TannoyBox — PLACEHOLDER READOUT WINDOW (116 x 180)
+     Yellowcoat — PLACEHOLDER READOUT WINDOW (116 x 180)
      Drawn at 262,120 in the 640x480 panel.
 
      The plugin writes two lines of live text over the middle of this frame:

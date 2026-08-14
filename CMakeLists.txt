@@ -6,7 +6,7 @@ if(APPLE)
     set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum macOS")
 endif()
 
-project(TannoyBox VERSION 1.0.0 LANGUAGES C CXX)
+project(Yellowcoat VERSION 1.0.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -32,15 +32,17 @@ else()
     FetchContent_MakeAvailable(JUCE)
 endif()
 
-juce_add_plugin(TannoyBox
+juce_add_plugin(Yellowcoat
     COMPANY_NAME            "Indelicate Instruments"
-    BUNDLE_ID               "xyz.indelicates.tannoybox"
+    BUNDLE_ID               "xyz.indelicates.yellowcoat"
     # NEVER change these two after a public release. Hosts identify the plugin
     # by them, and changing either orphans every saved session that used it.
+    # PLUGIN_CODE was Tnby under the old name and could still be changed then
+    # because nothing had shipped. That window is shut now.
     PLUGIN_MANUFACTURER_CODE Indl
-    PLUGIN_CODE             Tnby
+    PLUGIN_CODE             Ylwc
     FORMATS                 VST3 AU Standalone
-    PRODUCT_NAME            "TannoyBox"
+    PRODUCT_NAME            "Yellowcoat"
     IS_SYNTH                FALSE
     NEEDS_MIDI_INPUT        FALSE
     NEEDS_MIDI_OUTPUT       FALSE
@@ -56,28 +58,28 @@ juce_add_plugin(TannoyBox
 # Assets are resolved by stem at runtime with PNG preferred over SVG, so a
 # background.png quietly supersedes background.svg with no code change.
 # ------------------------------------------------------------------------------
-file(GLOB TANNOYBOX_ASSETS CONFIGURE_DEPENDS
+file(GLOB YELLOWCOAT_ASSETS CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/Resources/*.png"
     "${CMAKE_CURRENT_SOURCE_DIR}/Resources/*.svg")
 
-juce_add_binary_data(TannoyBoxAssets SOURCES ${TANNOYBOX_ASSETS})
+juce_add_binary_data(YellowcoatAssets SOURCES ${YELLOWCOAT_ASSETS})
 
-target_sources(TannoyBox PRIVATE
+target_sources(Yellowcoat PRIVATE
     Source/PluginProcessor.cpp
     Source/PluginEditor.cpp
-    Source/UI/TannoyLookAndFeel.cpp)
+    Source/UI/YellowcoatLookAndFeel.cpp)
 
-target_compile_definitions(TannoyBox PUBLIC
+target_compile_definitions(Yellowcoat PUBLIC
     JUCE_WEB_BROWSER=0
     JUCE_USE_CURL=0
     JUCE_VST3_CAN_REPLACE_VST2=0
     JUCE_DISPLAY_SPLASH_SCREEN=0
     JUCE_STRICT_REFCOUNTEDPOINTER=1)
 
-target_include_directories(TannoyBox PRIVATE Source)
+target_include_directories(Yellowcoat PRIVATE Source)
 
-target_link_libraries(TannoyBox PRIVATE
-    TannoyBoxAssets
+target_link_libraries(Yellowcoat PRIVATE
+    YellowcoatAssets
     juce::juce_audio_utils
     juce::juce_dsp
     PUBLIC
