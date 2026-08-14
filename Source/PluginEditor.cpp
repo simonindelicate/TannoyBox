@@ -29,6 +29,11 @@ namespace Layout
     static const juce::Rectangle<int> knobVintage { 54,  124, 180, 180 };
     static const juce::Rectangle<int> knobSize    { 406, 124, 180, 180 };
 
+    // The lower third of the readout window, freed when the placeholder
+    // lettering came out. Inside the nameplate's glass frame with the same
+    // 12-ish units of clearance the text above it has.
+    static const juce::Rectangle<int> presetButton { 280, 254, 80, 26 };
+
     static const int  smallY    = 368;
     static const int  smallSize = 64;
     static const int  smallX[5] { 68, 178, 288, 398, 508 };
@@ -93,6 +98,12 @@ YellowcoatEditor::YellowcoatEditor (YellowcoatProcessor& p)
         if (down)
             flash ("CHIME", "STRUCK");
     };
+
+    preset.setTooltip ("Presets: bundled, yours, and save");
+    preset.setClickingTogglesState (false);
+    preset.getProperties().set ("plain", true);   // a plate, not a lamp
+    preset.onClick = [this] { showPresetMenu(); };
+    addAndMakeVisible (preset);
 
     setResizable (true, true);
     if (auto* c = getConstrainer())
@@ -208,8 +219,9 @@ void YellowcoatEditor::resized()
     vintage.setBounds (d (Layout::knobVintage));
     size.setBounds    (d (Layout::knobSize));
 
-    ptt.setBounds   (d (Layout::switchPtt));
-    chime.setBounds (d (Layout::switchChime));
+    ptt.setBounds    (d (Layout::switchPtt));
+    chime.setBounds  (d (Layout::switchChime));
+    preset.setBounds (d (Layout::presetButton));
 
     juce::Slider* small[5] { &drive, &howl, &room, &mix, &output };
 
@@ -230,5 +242,103 @@ void YellowcoatEditor::timerCallback()
             chime.setToggleState (lit, juce::dontSendNotification);
     }
 
+    if (proc.presets.revision() != lastPresetRevision)
+    {
+        const bool first = lastPresetRevision < 0;
+        lastPresetRevision = proc.presets.revision();
+
+        if (! first && proc.presets.currentName().isNotEmpty())
+            flash ("PRESET", proc.presets.currentName());
+    }
+
     repaint (d (Layout::nameplate));
+}
+
+void YellowcoatEditor::showPresetMenu()
+{
+    // Rescanned every time it opens, so a file dropped into the folder from
+    // Explorer appears without reopening the plugin.
+    proc.presets.refresh();
+
+    const auto current = proc.presets.currentName();
+
+    juce::PopupMenu menu;
+    menu.setLookAndFeel (&lnf);
+
+    const auto& bundled = proc.presets.bundled();
+    const auto& user    = proc.presets.user();
+
+    if (! bundled.isEmpty())
+    {
+        menu.addSectionHeader ("BUNDLED");
+
+        for (int i = 0; i < bundled.size(); ++i)
+            menu.addItem (bundledBase + i, bundled.getReference (i).name,
+                          true, bundled.getReference (i).name == current);
+    }
+
+    if (! user.isEmpty())
+    {
+        menu.addSeparator();
+        menu.addSectionHeader ("YOURS");
+
+        for (int i = 0; i < user.size(); ++i)
+            menu.addItem (userBase + i, user.getReference (i).name,
+                          true, user.getReference (i).name == current);
+    }
+
+    menu.addSeparator();
+    menu.addItem (cmdSave, "Save current settings as...");
+    menu.addItem (cmdFolder, "Open presets folder");
+
+    menu.showMenuAsync (juce::PopupMenu::Options().withTargetComponent (preset),
+                        [this] (int result)
+                        {
+                            if (result == 0)
+                                return;
+
+                            if (result == cmdSave)
+                            {
+                                promptForPresetName();
+                            }
+                            else if (result == cmdFolder)
+                            {
+                                auto dir = PresetManager::folder();
+                                dir.createDirectory();       // may not exist yet
+                                dir.revealToUser();
+                            }
+                            else if (result >= userBase)
+                            {
+                                proc.presets.load (proc.presets.user().getReference (result - userBase));
+                            }
+                            else if (result >= bundledBase)
+                            {
+                                proc.presets.loadBundled (result - bundledBase);
+                            }
+                        });
+}
+
+void YellowcoatEditor::promptForPresetName()
+{
+    auto* window = new juce::AlertWindow ("Save preset",
+                                          "Saved into Documents\\Yellowcoat\\Presets.",
+                                          juce::MessageBoxIconType::NoIcon, this);
+
+    window->addTextEditor ("name", proc.presets.currentName(), "Name:");
+    window->addButton ("Save",   1, juce::KeyPress (juce::KeyPress::returnKey));
+    window->addButton ("Cancel", 0, juce::KeyPress (juce::KeyPress::escapeKey));
+
+    window->enterModalState (true, juce::ModalCallbackFunction::create (
+        [this, window] (int result)
+        {
+            if (result == 1)
+            {
+                const auto name = window->getTextEditorContents ("name");
+
+                if (proc.presets.saveAs (name) == juce::File())
+                    flash ("SAVE", "FAILED");
+                else
+                    flash ("SAVED", name);
+            }
+        }), true);
 }

@@ -7,6 +7,7 @@
 #include "DSP/EraProfiles.h"
 #include "DSP/HornBody.h"
 #include "DSP/SpaceEngine.h"
+#include "Presets.h"
 
 /*  These strings are written into every saved session. Adding to this list is
     safe; renaming or removing anything in it is not. */
@@ -43,10 +44,13 @@ public:
     bool isMidiEffect() const override                       { return false; }
     double getTailLengthSeconds() const override             { return 8.0; }
 
-    int getNumPrograms() override                            { return 1; }
-    int getCurrentProgram() override                         { return 0; }
-    void setCurrentProgram (int) override                    {}
-    const juce::String getProgramName (int) override         { return "Default"; }
+    // The host's program list is the BUNDLED presets only. User presets come
+    // and go, and a program count that changes under a host repoints every
+    // saved session that referenced one by index.
+    int getNumPrograms() override                            { return juce::jmax (1, presets.bundled().size()); }
+    int getCurrentProgram() override                         { return juce::jmax (0, presets.currentIndex()); }
+    void setCurrentProgram (int index) override              { presets.loadBundled (index); }
+    const juce::String getProgramName (int index) override;
     void changeProgramName (int, const juce::String&) override {}
 
     void getStateInformation (juce::MemoryBlock&) override;
@@ -54,6 +58,8 @@ public:
 
     static juce::AudioProcessorValueTreeState::ParameterLayout createLayout();
     juce::AudioProcessorValueTreeState apvts { *this, nullptr, "YELLOWCOAT", createLayout() };
+
+    PresetManager presets { *this, apvts };
 
 private:
     HornBody    horn;

@@ -68,8 +68,11 @@ public:
     static juce::Font stencil (float height, bool bold = false);
 
 private:
+    /** `plain` drops the indicator lamp and centres the caption instead —
+        for a button that opens something rather than switching something. */
     void drawSwitch (juce::Graphics&, juce::Rectangle<float> bounds,
-                     const juce::String& text, bool lit, bool highlighted, bool down);
+                     const juce::String& text, bool lit, bool highlighted,
+                     bool down, bool plain);
 
     /** How much bigger the control is than the knob body it draws inside it.
         The outermost thing in the ring is an index mark, which ends at 1.13

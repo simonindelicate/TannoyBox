@@ -17,6 +17,8 @@ private:
     void timerCallback() override;
     void configure (juce::Slider&, const char* paramID, const juce::String& readoutName);
     void flash (const juce::String& name, const juce::String& value);
+    void showPresetMenu();
+    void promptForPresetName();
 
     /** design space (640 x 480) -> current window */
     juce::Rectangle<int> d (int x, int y, int w, int h) const noexcept;
@@ -32,6 +34,7 @@ private:
     juce::Slider vintage, size, drive, howl, room, mix, output;
     juce::ToggleButton ptt { "PTT" };
     juce::TextButton   chime { "CHIME" };
+    juce::TextButton   preset { "PRESET" };
 
     juce::OwnedArray<juce::AudioProcessorValueTreeState::SliderAttachment> attachments;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> pttAttachment;
@@ -39,6 +42,17 @@ private:
     // CHIME is momentary, so it drives its parameter by hand rather than
     // through an attachment: down on press, up on release.
     bool chimeDown = false;
+
+    // Polled at 24 Hz so a preset loaded from the host's own program
+    // list flashes in the readout too, not just one loaded from ours.
+    int lastPresetRevision = -1;
+
+    // Menu ids. Kept apart so one switch can tell a bundled preset from one of
+    // yours without a second lookup.
+    static constexpr int cmdSave     = 1;
+    static constexpr int cmdFolder   = 2;
+    static constexpr int bundledBase = 1000;
+    static constexpr int userBase    = 2000;
 
     juce::String flashText;
     juce::uint32 flashUntil = 0;

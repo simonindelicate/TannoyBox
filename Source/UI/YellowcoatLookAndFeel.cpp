@@ -123,8 +123,8 @@ void YellowcoatLookAndFeel::drawRotarySlider (juce::Graphics& g, int x, int y, i
 }
 
 void YellowcoatLookAndFeel::drawSwitch (juce::Graphics& g, juce::Rectangle<float> bounds,
-                                    const juce::String& text, bool lit,
-                                    bool highlighted, bool down)
+                                        const juce::String& text, bool lit,
+                                        bool highlighted, bool down, bool plain)
 {
     const float radius = juce::jmin (7.0f, bounds.getHeight() * 0.24f);
 
@@ -143,19 +143,24 @@ void YellowcoatLookAndFeel::drawSwitch (juce::Graphics& g, juce::Rectangle<float
 
     cap = cap.reduced (cap.getHeight() * 0.16f);
 
-    // indicator lamp. Lit is the same phosphor green as the readout window;
-    // unlit is a dead bulb, not a dim one.
-    auto lamp = cap.removeFromLeft (cap.getHeight());
-    g.setColour (lit ? Palette::crt : Palette::ink.brighter (0.06f));
-    g.fillEllipse (lamp.reduced (lamp.getWidth() * 0.20f));
-
-    if (lit)
+    // A plain switch has no lamp and centres its caption across the whole cap.
+    // PRESET is one: it opens a menu rather than turning anything on.
+    if (! plain)
     {
-        g.setColour (Palette::crt.withAlpha (0.30f));
-        g.drawEllipse (lamp.reduced (lamp.getWidth() * 0.06f), lamp.getWidth() * 0.12f);
+        // indicator lamp. Lit is the same phosphor green as the readout window;
+        // unlit is a dead bulb, not a dim one.
+        auto lamp = cap.removeFromLeft (cap.getHeight());
+        g.setColour (lit ? Palette::crt : Palette::ink.brighter (0.06f));
+        g.fillEllipse (lamp.reduced (lamp.getWidth() * 0.20f));
+
+        if (lit)
+        {
+            g.setColour (Palette::crt.withAlpha (0.30f));
+            g.drawEllipse (lamp.reduced (lamp.getWidth() * 0.06f), lamp.getWidth() * 0.12f);
+        }
     }
 
-    g.setColour (Palette::cream.withAlpha (lit ? 1.0f : 0.70f));
+    g.setColour (Palette::cream.withAlpha (lit || plain ? 1.0f : 0.70f));
     g.setFont (stencil (juce::jmax (7.0f, cap.getHeight() * 0.62f), true));
     g.drawFittedText (text, cap.toNearestInt(), juce::Justification::centred, 1, 0.7f);
 }
@@ -164,7 +169,7 @@ void YellowcoatLookAndFeel::drawToggleButton (juce::Graphics& g, juce::ToggleBut
                                           bool highlighted, bool down)
 {
     drawSwitch (g, b.getLocalBounds().toFloat(), b.getButtonText(),
-                b.getToggleState(), highlighted, down);
+                b.getToggleState(), highlighted, down, false);
 }
 
 void YellowcoatLookAndFeel::drawButtonBackground (juce::Graphics& g, juce::Button& b,
@@ -173,5 +178,6 @@ void YellowcoatLookAndFeel::drawButtonBackground (juce::Graphics& g, juce::Butto
     // Momentary buttons have no toggle state of their own; CHIME's is driven
     // from its parameter so host automation lights the lamp too.
     drawSwitch (g, b.getLocalBounds().toFloat(), b.getButtonText(),
-                b.getToggleState() || down, highlighted, down);
+                b.getToggleState() || down, highlighted, down,
+                (bool) b.getProperties().getWithDefault ("plain", false));
 }

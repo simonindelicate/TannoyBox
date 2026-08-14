@@ -211,17 +211,38 @@ juce::AudioProcessorEditor* YellowcoatProcessor::createEditor()
     return new YellowcoatEditor (*this);
 }
 
+const juce::String YellowcoatProcessor::getProgramName (int index)
+{
+    if (juce::isPositiveAndBelow (index, presets.bundled().size()))
+        return presets.bundled().getReference (index).name;
+
+    return "Default";
+}
+
 void YellowcoatProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
-    if (auto xml = apvts.copyState().createXml())
+    auto state = apvts.copyState();
+
+    // Carried alongside the parameters so the readout can say what you loaded
+    // after a session reload. It is a label, not a source of truth — the
+    // parameter values in the same tree are what actually restore the sound.
+    state.setProperty ("presetName", presets.currentName(), nullptr);
+
+    if (auto xml = state.createXml())
         copyXmlToBinary (*xml, destData);
 }
 
 void YellowcoatProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     if (auto xml = getXmlFromBinary (data, sizeInBytes))
+    {
         if (xml->hasTagName (apvts.state.getType()))
-            apvts.replaceState (juce::ValueTree::fromXml (*xml));
+        {
+            const auto tree = juce::ValueTree::fromXml (*xml);
+            apvts.replaceState (tree);
+            presets.setCurrentName (tree.getProperty ("presetName", juce::String()).toString());
+        }
+    }
 }
 
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()

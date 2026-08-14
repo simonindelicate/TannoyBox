@@ -60,7 +60,8 @@ juce_add_plugin(Yellowcoat
 # ------------------------------------------------------------------------------
 file(GLOB YELLOWCOAT_ASSETS CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/Resources/*.png"
-    "${CMAKE_CURRENT_SOURCE_DIR}/Resources/*.svg")
+    "${CMAKE_CURRENT_SOURCE_DIR}/Resources/*.svg"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Resources/Presets/preset_*.xml")
 
 juce_add_binary_data(YellowcoatAssets SOURCES ${YELLOWCOAT_ASSETS})
 
