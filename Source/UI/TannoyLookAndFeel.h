@@ -71,6 +71,14 @@ private:
     void drawSwitch (juce::Graphics&, juce::Rectangle<float> bounds,
                      const juce::String& text, bool lit, bool highlighted, bool down);
 
+    /** How much bigger the control is than the knob body it draws inside it.
+        The outermost thing in the ring is an index mark, which ends at 1.13
+        body radii and then adds half its own stroke again for the round cap:
+        1.145. The rest is a pixel of antialiasing, which is not free at the
+        64-unit size the small dials are drawn at. Reduce this and the ring
+        gets clipped at the component bounds. */
+    static constexpr float ringRoom = 1.19f;
+
     Filmstrip largeStrip, smallStrip;
     std::unique_ptr<juce::Drawable> largeFace, smallFace, pointer;
 };

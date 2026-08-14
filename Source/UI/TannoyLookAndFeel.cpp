@@ -52,9 +52,16 @@ void TannoyLookAndFeel::drawRotarySlider (juce::Graphics& g, int x, int y, int w
     }
 
     // ---- otherwise: engraved marks, value arc, face, rotated pointer -------
+    // The marks and the arc live outside the knob body — the furthest is the
+    // index marks at 1.13r — so the body has to be smaller than the component
+    // to leave room for them. Derive r from the whole square instead and the
+    // ring is drawn beyond the component's bounds, where JUCE clips it: not
+    // at the corners, which have 1.41r to spare, but at the four points where
+    // the arc crosses an edge.
     const auto  sq     = square.toFloat();
     const auto  centre = sq.getCentre();
-    const float r      = sq.getWidth() * 0.5f;
+    const float r      = sq.getWidth() * 0.5f / ringRoom;
+    const auto  face   = juce::Rectangle<float> (r * 2.0f, r * 2.0f).withCentre (centre);
     const float angle  = startAngle + sliderPos * (endAngle - startAngle);
 
     const int detents = (int) slider.getProperties().getWithDefault ("detents", 0);
@@ -90,12 +97,12 @@ void TannoyLookAndFeel::drawRotarySlider (juce::Graphics& g, int x, int y, int w
     if (auto* body = isSmall ? smallFace.get() : largeFace.get())
     {
         g.setImageResamplingQuality (juce::Graphics::highResamplingQuality);
-        body->drawWithin (g, sq.reduced (r * 0.04f), juce::RectanglePlacement::centred, 1.0f);
+        body->drawWithin (g, face.reduced (r * 0.04f), juce::RectanglePlacement::centred, 1.0f);
     }
     else
     {
         g.setColour (Palette::ink);
-        g.fillEllipse (sq.reduced (r * 0.06f));
+        g.fillEllipse (face.reduced (r * 0.06f));
     }
 
     {
@@ -104,7 +111,7 @@ void TannoyLookAndFeel::drawRotarySlider (juce::Graphics& g, int x, int y, int w
 
         if (pointer != nullptr)
         {
-            pointer->drawWithin (g, sq, juce::RectanglePlacement::centred, 1.0f);
+            pointer->drawWithin (g, face, juce::RectanglePlacement::centred, 1.0f);
         }
         else
         {
