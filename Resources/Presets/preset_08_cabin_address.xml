@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<YELLOWCOAT_PRESET name="Cabin Address">
+  <PARAM id="vintage" value="0.06"/>
+  <PARAM id="size"    value="0.08"/>
+  <PARAM id="drive"   value="0.0"/>
+  <PARAM id="howl"    value="0.0"/>
+  <PARAM id="room"    value="0.38"/>
+  <PARAM id="mix"     value="1.0"/>
+  <PARAM id="output"  value="0.0"/>
+  <PARAM id="ptt"     value="1.0"/>
+</YELLOWCOAT_PRESET>

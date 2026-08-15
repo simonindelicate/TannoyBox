@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ROOM at 100% removes the horn's direct arrival entirely, which turns the
+     plugin into a send effect. Nothing on the front panel tells you that, so
+     this preset exists mostly to point at it. Put it on an aux, MIX at 100%. -->
+<YELLOWCOAT_PRESET name="Return Delay">
+  <PARAM id="vintage" value="0.55"/>
+  <PARAM id="size"    value="0.72"/>
+  <PARAM id="drive"   value="0.0"/>
+  <PARAM id="howl"    value="0.0"/>
+  <PARAM id="room"    value="1.0"/>
+  <PARAM id="mix"     value="1.0"/>
+  <PARAM id="output"  value="0.0"/>
+  <PARAM id="ptt"     value="0.0"/>
+</YELLOWCOAT_PRESET>
