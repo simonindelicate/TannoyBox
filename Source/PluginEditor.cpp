@@ -116,6 +116,13 @@ YellowcoatEditor::YellowcoatEditor (YellowcoatProcessor& p)
     }
 
     setSize (640, 480);
+
+    // Attaching a slider sets its value, which fires onValueChange, which
+    // flashes. So an editor that has only just been built arrives showing
+    // whichever control happened to be attached last — MIX, as it happens.
+    // Nobody touched anything: start on the idle display.
+    flashUntil = 0;
+
     startTimerHz (24);
 }
 
