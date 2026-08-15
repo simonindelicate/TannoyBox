@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<YELLOWCOAT_PRESET name="Backrooms">
+  <PARAM id="vintage" value="1.0"/>
+  <PARAM id="size" value="1.0"/>
+  <PARAM id="drive" value="4.0"/>
+  <PARAM id="howl" value="0.1639999896287918"/>
+  <PARAM id="mix" value="1.0"/>
+  <PARAM id="output" value="6.100000381469727"/>
+  <PARAM id="room" value="1.0"/>
+  <PARAM id="ptt" value="0.0"/>
+</YELLOWCOAT_PRESET>

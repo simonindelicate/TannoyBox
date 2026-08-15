@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<YELLOWCOAT_PRESET name="Hi-De-Hi Campers">
+  <PARAM id="vintage" value="0.6919999718666077"/>
+  <PARAM id="size" value="0.5559999942779541"/>
+  <PARAM id="drive" value="-6.699999809265137"/>
+  <PARAM id="howl" value="0.119999997317791"/>
+  <PARAM id="mix" value="1.0"/>
+  <PARAM id="output" value="5.600000381469727"/>
+  <PARAM id="room" value="0.239999994635582"/>
+  <PARAM id="ptt" value="0.0"/>
+</YELLOWCOAT_PRESET>
